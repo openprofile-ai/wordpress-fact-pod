@@ -1,0 +1,21 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+
+# IDE files
+.vscode/
+.idea/
+
+# ssl config files
+docker/apache/ssl/*
+!docker/apache/ssl/.gitkeep
+
+# tmp files
+tmp/*
+!tmp/.gitkeep
+
+#wp-config
+app/wp-config.php
