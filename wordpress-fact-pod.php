@@ -26,6 +26,9 @@ require_once WORDPRESS_FACT_POD_PATH . 'vendor/autoload.php';
 
 add_action('admin_menu', 'wpfp_add_admin_menu');
 
+// Start WP session
+new \OpenProfile\WordpressFactPod\Utils\Session();
+
 function wpfp_add_admin_menu() {
     add_menu_page(
         'Fact Pod Settings',
