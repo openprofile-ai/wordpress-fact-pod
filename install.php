@@ -1,6 +1,4 @@
 <?php
-register_activation_hook(__FILE__, 'wp_fact_pod_install');
-
 function wp_fact_pod_install() {
     global $wpdb;
 
@@ -51,7 +49,7 @@ function wp_fact_pod_install() {
 
     $scopes = [
         ['id' => 'facts:read'],
-        ['id' => 'facts:irrelevant'],
+        ['id' => 'facts:make-irrelevant'],
     ];
     foreach ($scopes as $scope) {
         $wpdb->insert(

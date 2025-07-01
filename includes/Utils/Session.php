@@ -8,7 +8,7 @@ class Session
 
     public function __construct()
     {
-        add_action('init', 'start_wp_session', 1);
+        add_action('init', array ($this, 'start_wp_session'), 1);
     }
 
     public static function start_wp_session()

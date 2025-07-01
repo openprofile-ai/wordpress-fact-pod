@@ -24,6 +24,7 @@ if ( ! file_exists( WORDPRESS_FACT_POD_PATH . 'vendor/autoload.php' ) ) {
 
 require_once WORDPRESS_FACT_POD_PATH . 'vendor/autoload.php';
 
+register_activation_hook(WORDPRESS_FACT_POD_PATH . 'install.php', 'wp_fact_pod_install');
 add_action('admin_menu', 'wpfp_add_admin_menu');
 
 // Start WP session
