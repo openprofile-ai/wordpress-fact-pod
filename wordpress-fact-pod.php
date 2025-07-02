@@ -23,7 +23,8 @@ if ( ! file_exists( WORDPRESS_FACT_POD_PATH . 'vendor/autoload.php' ) ) {
 
 require_once WORDPRESS_FACT_POD_PATH . 'vendor/autoload.php';
 
-register_activation_hook(WORDPRESS_FACT_POD_PATH . 'install.php', 'wp_fact_pod_install');
+register_activation_hook(__FILE__, 'wp_fact_pod_install');
+register_activation_hook(__FILE__, 'add_category_oauth_scopes');
 
 // Start WP session
 new \OpenProfile\WordpressFactPod\Utils\Session();
@@ -69,3 +70,18 @@ if (!is_admin()) {
         }
     });
 }
+
+// TEST
+// Add this to your theme's functions.php or a custom plugin
+add_action('admin_menu', function() {
+    add_menu_page(
+        'TEST',
+        'TEST',
+        'manage_options',
+        'TEST',
+        function() {
+            add_category_oauth_scopes();
+            echo '<div class="notice notice-success"><p>Scopes imported!</p></div>';
+        }
+    );
+});

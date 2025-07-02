@@ -34,9 +34,9 @@ PRIMARY KEY  (authorization_code)
 
 CREATE TABLE wp_fact_pod_oauth_scopes (
 scope varchar(80) NOT NULL,
+is_active tinyint(1) NOT NULL DEFAULT 1,
+description varchar(100) DEFAULT NULL,
 PRIMARY KEY  (scope)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
-INSERT INTO wp_fact_pod_oauth_scopes (scope) VALUES ('facts:read');
-INSERT INTO wp_fact_pod_oauth_scopes (scope) VALUES ('facts:make-irrelevant');
 INSERT INTO `openprofile`.`wp_fact_pod_oauth_clients` (`id`, `name`, `secret`, `redirect_uri`, `grant_types`) VALUES ('40b46cf8-e2eb-491a-8e2a-6e38d164c377', 'Gateway', 'SECRET', 'https://gateway.openprofile.ai/oauth/callback', 'authorization_code, refresh_token');

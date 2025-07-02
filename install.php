@@ -38,6 +38,8 @@ function wp_fact_pod_install() {
     // Table: oauth_scopes
     $sql_scopes = "CREATE TABLE {$prefix}oauth_scopes (
         scope varchar(80) NOT NULL,
+        is_active tinyint(1) NOT NULL DEFAULT 1,
+        description varchar(100) DEFAULT NULL,
         PRIMARY KEY  (scope)
     ) $charset_collate;";
 
@@ -46,18 +48,67 @@ function wp_fact_pod_install() {
     dbDelta($sql_refresh_tokens);
     dbDelta($sql_auth_codes);
     dbDelta($sql_scopes);
+}
 
-    $scopes = [
-        ['id' => 'facts:read'],
-        ['id' => 'facts:make-irrelevant'],
-    ];
-    foreach ($scopes as $scope) {
-        $wpdb->insert(
-            $prefix.'oauth_scopes',
-            [
-                'id' => $scope['id'],
-            ],
-            ['%s']
-        );
+function add_category_oauth_scopes() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'fact_pod_oauth_scopes';
+
+    $categories = get_terms(array(
+        'taxonomy'   => 'product_cat',
+        'hide_empty' => false,
+        'parent'     => 0,
+    ));
+
+    foreach ($categories as $category) {
+        $scope = 'facts:category-' . $category->term_id;
+
+        // Check if scope already exists
+        $exists = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM $table_name WHERE scope = %s",
+            $scope
+        ));
+
+        if (!$exists) {
+            $wpdb->insert(
+                $table_name,
+                array(
+                    'scope' => $scope,
+                    'description' => sprintf('Facts about client\'s purchases in the %s category', $category->name),
+                ),
+                array(
+                    '%s',
+                )
+            );
+        }
+    }
+
+    // Insert additional scopes
+    $additional_scopes = array(
+        array(
+            'scope' => 'facts:wishlist',
+            'description' => 'Facts about items in the client\'s wishlist',
+        )
+    );
+
+    foreach ($additional_scopes as $scope_data) {
+        $exists = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM $table_name WHERE scope = %s",
+            $scope_data['scope']
+        ));
+
+        if (!$exists) {
+            $wpdb->insert(
+                $table_name,
+                array(
+                    'scope' => $scope_data['scope'],
+                    'description' => $scope_data['description'],
+                ),
+                array(
+                    '%s',
+                    '%s',
+                )
+            );
+        }
     }
 }
