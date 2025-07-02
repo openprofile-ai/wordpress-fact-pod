@@ -78,6 +78,14 @@ class Auth
                 'methods' => 'POST',
                 'callback' => array($this, 'approve'),
                 'permission_callback' => array( $this, 'check_auth_request' ),
+                'args'                => array(
+                    'scopes'   => array(
+                        'type'        => 'array',
+                        'description' => 'List of approved scopes',
+                        'required'    => true,
+                    ),
+                ),
+                'validate_callback' => array($this, 'validate_scopes_exist'),
             )
         );
 
@@ -118,12 +126,7 @@ class Auth
             );
 
             Session::put('auth_request', $authRequest);
-
-            if (!is_user_logged_in()) {
-                $this->redirect_to_login();
-            } else {
-                $this->redirect_to_scopes();
-            }
+            $this->redirect_to_login();
 
             exit;
         } catch (OAuthServerException $exception) {
@@ -154,7 +157,7 @@ class Auth
         exit;
     }
 
-    public function approve()
+    public function approve(\WP_REST_Request $request)
     {
         if (!is_user_logged_in()) {
             $this->redirect_to_login();
@@ -167,6 +170,7 @@ class Auth
 
         $authRequest->setUser(new UserEntity(wp_get_current_user()));
         $authRequest->setAuthorizationApproved(true);
+        $authRequest->setScopes();
 
         // TODO Store in the DB approved OpenProfile permissions
 
@@ -192,5 +196,32 @@ class Auth
         return Http::transform_to_wp_rest_response(
             $this->server->completeAuthorizationRequest($authRequest, $response)
         );
+    }
+
+    public function validate_scopes_exist($value, $request, $param) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'fact_pod_oauth_scopes';
+
+        if (!is_array($value) || empty($value)) {
+            return new \WP_Error('invalid_scopes', 'Scopes must be a non-empty array.', array('status' => 400));
+        }
+
+        // Prepare for SQL IN clause
+        $placeholders = implode(',', array_fill(0, count($value), '%s'));
+        $query = "SELECT scope FROM $table_name WHERE scope IN ($placeholders)";
+        $results = $wpdb->get_col($wpdb->prepare($query, $value));
+
+        // Find missing scopes
+        $missing = array_diff($value, $results);
+
+        if (!empty($missing)) {
+            return new \WP_Error(
+                'invalid_scopes',
+                'The following scopes do not exist: ' . implode(', ', $missing),
+                array('status' => 400)
+            );
+        }
+
+        return true;
     }
 }

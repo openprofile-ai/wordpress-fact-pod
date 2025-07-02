@@ -15,7 +15,7 @@ class ScopeRepository implements ScopeRepositoryInterface
         $table = $wpdb->prefix . 'fact_pod_oauth_scopes';
 
         $scopeRow = $wpdb->get_row(
-            $wpdb->prepare("SELECT * FROM $table WHERE scope = %s", $identifier)
+            $wpdb->prepare("SELECT * FROM $table WHERE scope = %s AND is_active=1", $identifier)
         );
 
         if (!$scopeRow) {
