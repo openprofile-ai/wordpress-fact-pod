@@ -145,7 +145,7 @@ class Auth
 
     public function redirect_to_login(): void
     {
-        wp_redirect(wp_login_url());
+        wp_redirect('/my-account');
 
         exit;
     }
