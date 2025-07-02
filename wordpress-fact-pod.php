@@ -10,7 +10,6 @@ defined('ABSPATH') || exit;
 
 const WORDPRESS_FACT_POD_VERSION = '0.0.1';
 define( 'WORDPRESS_FACT_POD_PATH', plugin_dir_path( __FILE__ ) );
-define( 'WORDPRESS_FACT_POD_URL', plugin_dir_url( __FILE__ ) );
 
 // Check if Composer autoloader exists.
 if ( ! file_exists( WORDPRESS_FACT_POD_PATH . 'vendor/autoload.php' ) ) {
@@ -25,10 +24,14 @@ if ( ! file_exists( WORDPRESS_FACT_POD_PATH . 'vendor/autoload.php' ) ) {
 require_once WORDPRESS_FACT_POD_PATH . 'vendor/autoload.php';
 
 register_activation_hook(WORDPRESS_FACT_POD_PATH . 'install.php', 'wp_fact_pod_install');
-add_action('admin_menu', 'wpfp_add_admin_menu');
 
 // Start WP session
 new \OpenProfile\WordpressFactPod\Utils\Session();
+
+// Start Auth
+new \OpenProfile\WordpressFactPod\OAuth\Auth(WORDPRESS_FACT_POD_PATH.'private.key', WORDPRESS_FACT_POD_PATH.'public.key');
+
+add_action('admin_menu', 'wpfp_add_admin_menu');
 
 function wpfp_add_admin_menu() {
     add_menu_page(

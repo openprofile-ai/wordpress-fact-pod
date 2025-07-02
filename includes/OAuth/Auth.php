@@ -20,15 +20,14 @@ class Auth
 {
     private AuthorizationServer $server;
 
-    public function __construct(string $privateKey, string $encryptionKey)
+    public function __construct(private string $privateKey, private string $encryptionKey)
     {
-        $this->init_oauth_server($privateKey, $encryptionKey);
-
+        add_action('init', array($this, 'init_oauth_server'));
         add_action('rest_api_init', array($this, 'register_routes'));
-        add_filter('rest_authentication_errors', array($this, 'authenticate_request'));
+        add_action('wp_login', array($this, 'redirect_to_scopes'));
     }
 
-    public function init_oauth_server(string $privateKey, string $encryptionKey): void
+    public function init_oauth_server(): void
     {
         $clientRepository = new ClientRepository();
         $scopeRepository = new ScopeRepository();
@@ -42,8 +41,8 @@ class Auth
             $clientRepository,
             $accessTokenRepository,
             $scopeRepository,
-            $privateKey,
-            $encryptionKey
+            $this->privateKey,
+            $this->encryptionKey
         );
 
         $grant = new AuthCodeGrant(
@@ -143,7 +142,6 @@ class Auth
 
     public function redirect_to_login(): void
     {
-        add_action('wp_login', array($this, 'redirect_to_scopes'));
         wp_redirect(wp_login_url());
 
         exit;
