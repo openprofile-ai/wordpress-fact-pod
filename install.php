@@ -1,4 +1,9 @@
 <?php
+
+defined('ABSPATH') || exit;
+
+require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
 function wp_fact_pod_install() {
     global $wpdb;
 
