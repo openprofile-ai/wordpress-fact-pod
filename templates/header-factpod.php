@@ -18,6 +18,19 @@
             padding: 2rem;
             box-shadow: 0 0 10px rgba(0,0,0,0.05);
         }
+         header .main-navigation, .main-header,
+         .site-header .menu, .screen-reader-text.skip-link,
+         nav,
+         .primary-menu {
+             display: none !important;
+         }
+        .fact-pod-form{
+            width: 75%;
+            margin: 45px auto;
+        }
+        .fact-pod-form h1, .fact-pod-form h2, .fact-pod-form h3{
+            text-align: center;
+        }
     </style>
 </head>
 <body <?php body_class(); ?>>

@@ -6,20 +6,10 @@ defined('ABSPATH') || exit;
 
 include WORDPRESS_FACT_POD_PATH . 'templates/header-factpod.php';
 ?>
-    <style>
-        header .main-navigation, .main-header,
-        .site-header .menu, .screen-reader-text.skip-link,
-        nav,
-        .primary-menu {
-            display: none !important;
-        }
-
-    </style>
-    <br>
-    <br>
-    <br>
-    <div class="wrap">
-        <?php echo do_shortcode('[woocommerce_my_account]'); ?>
+    <div class="fact-pod-form">
+        <h2>User Authentication</h2>
+        <h1>AUTH</h1>
+        <?php woocommerce_login_form(); ?>
     </div>
 
 <?php
