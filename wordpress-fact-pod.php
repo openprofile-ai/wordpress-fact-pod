@@ -26,12 +26,53 @@ require_once WORDPRESS_FACT_POD_PATH . 'vendor/autoload.php';
 register_activation_hook(__FILE__, 'wp_fact_pod_install');
 register_activation_hook(__FILE__, 'add_category_oauth_scopes');
 
+function wpfp_on_plugin_activation() {
+    wp_fact_pod_install();
+    add_category_oauth_scopes();
+    update_option('wpfp_flush_rewrite', true);
+    flush_rewrite_rules();
+}
+register_activation_hook(__FILE__, 'wpfp_on_plugin_activation');
+
+add_action('init', function () {
+    add_rewrite_rule(
+        '^openprofile/oauth/register/?$',
+        'index.php?wpfp_oauth_register=1',
+        'top'
+    );
+
+    if (get_option('wpfp_flush_rewrite')) {
+        flush_rewrite_rules();
+        delete_option('wpfp_flush_rewrite');
+    }
+});
+
+add_filter('query_vars', function ($vars) {
+    $vars[] = 'wpfp_oauth_register';
+    return $vars;
+});
+
+add_action('template_redirect', function () {
+    if (get_query_var('wpfp_oauth_register')) {
+        include WORDPRESS_FACT_POD_PATH . 'templates/oauth-register.php';
+        exit;
+    }
+});
+
 // Start WP session
 new \OpenProfile\WordpressFactPod\Utils\Session();
 
 // Start Auth
-new \OpenProfile\WordpressFactPod\OAuth\Auth(WORDPRESS_FACT_POD_PATH.'private.key', WORDPRESS_FACT_POD_PATH.'public.key');
+add_action('init', function () {
+    $privateKey = WORDPRESS_FACT_POD_PATH . 'private.key';
+    $publicKey  = WORDPRESS_FACT_POD_PATH . 'public.key';
 
+    if (file_exists($privateKey) && file_exists($publicKey)) {
+        new \OpenProfile\WordpressFactPod\OAuth\Auth($privateKey, $publicKey);
+    } else {
+        error_log('[FactPod] Missing private or public key at init.');
+    }
+});
 add_action('admin_menu', 'wpfp_add_admin_menu');
 
 function wpfp_add_admin_menu() {
@@ -46,19 +87,6 @@ function wpfp_add_admin_menu() {
     );
 }
 
-register_activation_hook(__FILE__, function () {
-    update_option('wpfp_flush_rewrite', true);
-});
-
-add_action('init', function () {
-    add_rewrite_endpoint('factpod', EP_ROOT | EP_PAGES);
-
-    if (get_option('wpfp_flush_rewrite')) {
-        flush_rewrite_rules();
-        delete_option('wpfp_flush_rewrite');
-    }
-});
-
 if (is_admin()) {
     require_once WORDPRESS_FACT_POD_PATH . 'src/admin/settings-page.php';
 }
@@ -70,18 +98,3 @@ if (!is_admin()) {
         }
     });
 }
-
-// TEST
-// Add this to your theme's functions.php or a custom plugin
-add_action('admin_menu', function() {
-    add_menu_page(
-        'TEST',
-        'TEST',
-        'manage_options',
-        'TEST',
-        function() {
-            add_category_oauth_scopes();
-            echo '<div class="notice notice-success"><p>Scopes imported!</p></div>';
-        }
-    );
-});
