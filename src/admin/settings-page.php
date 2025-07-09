@@ -20,19 +20,6 @@ function wpfp_settings_page_html() {
         <h1>Admin Settings Fact Pod</h1>
         <form method="post">
             <?php wp_nonce_field('wpfp_save_settings'); ?>
-            <h3>OpenProfile Clients</h3>
-                <p>
-                    <label for="wpfp_domain">
-                        Domain:
-                        <input type="text" name="wpfp_domain" id="wpfp_domain" placeholder="Domain:"/>
-                    </label>
-                </p>
-                <p>
-                    <label for="wpfp_client_id">
-                        Client ID:
-                        <input type="text" name="wpfp_client_id" id="wpfp_client_id" placeholder="Client ID:"/>
-                    </label>
-                </p>
             <h3>Allowed to Share</h3>
                 <p>
                     <label for="wpfp_purchases">
