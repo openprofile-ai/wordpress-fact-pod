@@ -22,7 +22,7 @@ class Auth
 
     public function __construct(private string $privateKey, private string $encryptionKey)
     {
-        add_action('init', array($this, 'init_oauth_server'));
+        add_action('rest_api_init', array($this, 'init_oauth_server'));
         add_action('rest_api_init', array($this, 'register_routes'));
         add_action('wp_login', array($this, 'redirect_to_scopes'));
     }
@@ -145,7 +145,7 @@ class Auth
 
     public function redirect_to_login(): void
     {
-        wp_redirect('/my-account');
+        wp_redirect('/openprofile/oauth/login/');
 
         exit;
     }

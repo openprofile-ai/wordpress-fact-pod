@@ -36,8 +36,8 @@ register_activation_hook(__FILE__, 'wpfp_on_plugin_activation');
 
 add_action('init', function () {
     add_rewrite_rule(
-        '^openprofile/oauth/register/?$',
-        'index.php?wpfp_oauth_register=1',
+        '^openprofile/oauth/login/?$',
+        'index.php?wpfp_oauth_login=1',
         'top'
     );
 
@@ -48,13 +48,13 @@ add_action('init', function () {
 });
 
 add_filter('query_vars', function ($vars) {
-    $vars[] = 'wpfp_oauth_register';
+    $vars[] = 'wpfp_oauth_login';
     return $vars;
 });
 
 add_action('template_redirect', function () {
-    if (get_query_var('wpfp_oauth_register')) {
-        include WORDPRESS_FACT_POD_PATH . 'templates/oauth-register.php';
+    if (get_query_var('wpfp_oauth_login')) {
+        include WORDPRESS_FACT_POD_PATH . 'templates/oauth-login.php';
         exit;
     }
 });
