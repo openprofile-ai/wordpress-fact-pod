@@ -22,7 +22,7 @@ class ScopeRepository implements ScopeRepositoryInterface
             return null;
         }
 
-        return new ScopeEntity($scopeRow->scope);
+        return new ScopeEntity($scopeRow->scope, $scopeRow->description);
     }
 
     public function finalizeScopes(array $scopes, string $grantType, ClientEntityInterface $clientEntity, ?string $userIdentifier = null, ?string $authCodeId = null): array

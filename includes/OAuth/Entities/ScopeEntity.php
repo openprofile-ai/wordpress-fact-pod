@@ -6,12 +6,8 @@ use League\OAuth2\Server\Entities\ScopeEntityInterface;
 
 class ScopeEntity implements ScopeEntityInterface
 {
-    private string $identifier;
-
-    public function __construct(string $identifier)
-    {
-        $this->identifier = $identifier;
-    }
+    public function __construct(private string $identifier, private string $description = '')
+    {}
 
     public function getIdentifier(): string
     {
@@ -21,5 +17,10 @@ class ScopeEntity implements ScopeEntityInterface
     public function jsonSerialize(): mixed
     {
         return $this->identifier;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
     }
 }

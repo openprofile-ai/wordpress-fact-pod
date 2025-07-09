@@ -152,7 +152,7 @@ class Auth
 
     public function redirect_to_scopes(): void
     {
-        wp_redirect('/openprofile/oauth/scopes');
+        wp_redirect('/openprofile/oauth/scopes/');
 
         exit;
     }

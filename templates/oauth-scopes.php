@@ -1,6 +1,6 @@
 <?php
 /**
- * Template for /openprofile/oauth/register
+ * Template for /openprofile/oauth/scopes
  */
 
 use League\OAuth2\Server\RequestTypes\AuthorizationRequestInterface;
@@ -13,22 +13,20 @@ include WORDPRESS_FACT_POD_PATH . 'templates/header-factpod.php';
 /** @var AuthorizationRequestInterface $authRequest */
 $authRequest = Session::get('auth_request');
 
-if (is_null($authRequest)) {
-    wp_redirect('/');
-    exit;
-}
-
 /** @var WP_User $user */
 $user = wp_get_current_user();
 
-if (! is_null($user)) {
-    wp_redirect('/openprofile/oauth/scopes/');
+if (is_null($authRequest) || is_null($user)) {
+    wp_redirect('/');
     exit;
 }
 ?>
     <div class="fact-pod-form">
         <h2>Sign up to <?php echo $authRequest->getClient()->getName() ?></h2>
-        <?php woocommerce_login_form(); ?>
+
+        <?php foreach ($authRequest->getScopes() as $scope) { ?>
+            <label><input type="checkbox" value="<?php echo $scope->getIdentifier() ?>" /> <?php echo $scope->getDescription() ?></label>
+        <?php } ?>
     </div>
 
 <?php

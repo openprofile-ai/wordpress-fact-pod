@@ -41,6 +41,12 @@ add_action('init', function () {
         'top'
     );
 
+    add_rewrite_rule(
+        '^openprofile/oauth/scopes/?$',
+        'index.php?wpfp_oauth_scopes=1',
+        'top'
+    );
+
     if (get_option('wpfp_flush_rewrite')) {
         flush_rewrite_rules();
         delete_option('wpfp_flush_rewrite');
@@ -49,12 +55,17 @@ add_action('init', function () {
 
 add_filter('query_vars', function ($vars) {
     $vars[] = 'wpfp_oauth_login';
+    $vars[] = 'wpfp_oauth_scopes';
     return $vars;
 });
 
 add_action('template_redirect', function () {
     if (get_query_var('wpfp_oauth_login')) {
         include WORDPRESS_FACT_POD_PATH . 'templates/oauth-login.php';
+        exit;
+    }
+    if (get_query_var('wpfp_oauth_scopes')) {
+        include WORDPRESS_FACT_POD_PATH . 'templates/oauth-scopes.php';
         exit;
     }
 });
