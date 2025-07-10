@@ -109,3 +109,9 @@ if (!is_admin()) {
         }
     });
 }
+
+function fact_pod_enqueue_styles() {
+    wp_enqueue_style('fact-pod-styles', plugin_dir_url(__FILE__) . 'assets/styles/fact-pod.css');
+}
+
+add_action('wp_enqueue_scripts', 'fact_pod_enqueue_styles');

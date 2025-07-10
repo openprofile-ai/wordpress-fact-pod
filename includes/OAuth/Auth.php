@@ -91,10 +91,10 @@ class Auth
 
         register_rest_route(
             'openprofile/oauth',
-            '/deni',
+            '/deny',
             array(
                 'methods' => 'POST',
-                'callback' => array($this, 'deni'),
+                'callback' => array($this, 'deny'),
                 'permission_callback' => array( $this, 'check_auth_request' ),
             )
         );
@@ -179,7 +179,7 @@ class Auth
         );
     }
 
-    public function deni()
+    public function deny()
     {
         if (!is_user_logged_in()) {
             $this->redirect_to_login();
@@ -198,21 +198,24 @@ class Auth
         );
     }
 
-    public function validate_scopes_exist($value, $request, $param) {
+    public function validate_scopes_exist(\WP_REST_Request $request)
+    {
+        $scopes = $request->get_param('scopes');
+
         global $wpdb;
         $table_name = $wpdb->prefix . 'fact_pod_oauth_scopes';
 
-        if (!is_array($value) || empty($value)) {
+        if (!is_array($scopes) || empty($scopes)) {
             return new \WP_Error('invalid_scopes', 'Scopes must be a non-empty array.', array('status' => 400));
         }
 
         // Prepare for SQL IN clause
-        $placeholders = implode(',', array_fill(0, count($value), '%s'));
+        $placeholders = implode(',', array_fill(0, count($scopes), '%s'));
         $query = "SELECT scope FROM $table_name WHERE scope IN ($placeholders)";
-        $results = $wpdb->get_col($wpdb->prepare($query, $value));
+        $results = $wpdb->get_col($wpdb->prepare($query, $scopes));
 
         // Find missing scopes
-        $missing = array_diff($value, $results);
+        $missing = array_diff($scopes, $results);
 
         if (!empty($missing)) {
             return new \WP_Error(
