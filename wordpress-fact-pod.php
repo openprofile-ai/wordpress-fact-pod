@@ -115,3 +115,16 @@ function fact_pod_enqueue_styles() {
 }
 
 add_action('wp_enqueue_scripts', 'fact_pod_enqueue_styles');
+
+function fact_pod_plugin_enqueue_scripts() {
+    wp_register_script(
+        'fact-pod-script',
+        plugins_url('assets/js/fact-pod.js', __FILE__),
+        array('jquery'),
+        '1.0',
+        true
+    );
+
+    wp_enqueue_script('fact-pod-script');
+}
+add_action('wp_enqueue_scripts', 'fact_pod_plugin_enqueue_scripts');
