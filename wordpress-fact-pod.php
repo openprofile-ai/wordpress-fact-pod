@@ -23,8 +23,16 @@ if ( ! file_exists( WORDPRESS_FACT_POD_PATH . 'vendor/autoload.php' ) ) {
 
 require_once WORDPRESS_FACT_POD_PATH . 'vendor/autoload.php';
 
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        error_log("Custom error handler: $errstr in $errfile on line $errline");
+    }
+    return true;
+}, E_USER_NOTICE);
+
 register_activation_hook(__FILE__, 'wp_fact_pod_install');
 register_activation_hook(__FILE__, 'add_category_oauth_scopes');
+register_activation_hook(__FILE__, 'wp_fact_pod_generate_keys');
 
 function wpfp_on_plugin_activation() {
     wp_fact_pod_install();
