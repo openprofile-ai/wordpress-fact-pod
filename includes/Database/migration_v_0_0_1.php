@@ -6,30 +6,30 @@ return new class {
     {
         global $wpdb;
 
-        $charset_collate = $wpdb->get_charset_collate();
+        $charsetCollate = $wpdb->get_charset_collate();
         $prefix = $wpdb->prefix . 'fact_pod_';
 
         // Table: oauth_clients
-        $sql_clients = "CREATE TABLE {$prefix}oauth_clients (
+        $sqlClients = "CREATE TABLE {$prefix}oauth_clients (
         id varchar(36) NOT NULL,
         name varchar(255) NOT NULL,
         secret varchar(100) DEFAULT NULL,
         redirect_uri text NOT NULL,
         grant_types text DEFAULT NULL,
         PRIMARY KEY  (id)
-    ) $charset_collate;";
+    ) $charsetCollate;";
 
         // Table: oauth_refresh_tokens
-        $sql_refresh_tokens = "CREATE TABLE {$prefix}oauth_refresh_tokens (
+        $sqlRefreshTokens = "CREATE TABLE {$prefix}oauth_refresh_tokens (
         refresh_token varchar(100) NOT NULL,
         access_token VARCHAR(100) DEFAULT NULL,
         revoked TINYINT(1) DEFAULT 0,
         expires datetime NOT NULL,
         PRIMARY KEY  (refresh_token)
-    ) $charset_collate;";
+    ) $charsetCollate;";
 
         // Table: oauth_auth_codes
-        $sql_auth_codes = "CREATE TABLE {$prefix}oauth_auth_codes (
+        $sqlAuthCodes = "CREATE TABLE {$prefix}oauth_auth_codes (
         authorization_code varchar(100) NOT NULL,
         client_id varchar(80) NOT NULL,
         user_id varchar(80) NOT NULL,
@@ -37,21 +37,21 @@ return new class {
         expires datetime NOT NULL,
         scope text DEFAULT NULL,
         PRIMARY KEY  (authorization_code)
-    ) $charset_collate;";
+    ) $charsetCollate;";
 
         // Table: oauth_scopes
-        $sql_scopes = "CREATE TABLE {$prefix}oauth_scopes (
+        $sqlScopes = "CREATE TABLE {$prefix}oauth_scopes (
         scope varchar(80) NOT NULL,
         is_active tinyint(1) NOT NULL DEFAULT 1,
         description varchar(100) DEFAULT NULL,
         PRIMARY KEY  (scope)
-    ) $charset_collate;";
+    ) $charsetCollate;";
 
         // Create tables
-        dbDelta($sql_clients);
-        dbDelta($sql_refresh_tokens);
-        dbDelta($sql_auth_codes);
-        dbDelta($sql_scopes);
+        dbDelta($sqlClients);
+        dbDelta($sqlRefreshTokens);
+        dbDelta($sqlAuthCodes);
+        dbDelta($sqlScopes);
 
         $this->addOauthScopes();
     }
@@ -59,7 +59,7 @@ return new class {
     private function addOauthScopes() {
         global $wpdb;
 
-        $table_name = $wpdb->prefix . 'fact_pod_oauth_scopes';
+        $tableName = $wpdb->prefix . 'fact_pod_oauth_scopes';
 
         $categories = get_terms(array(
             'taxonomy'   => 'product_cat',
@@ -72,13 +72,13 @@ return new class {
 
             // Check if scope already exists
             $exists = $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM $table_name WHERE scope = %s",
+                "SELECT COUNT(*) FROM $tableName WHERE scope = %s",
                 $scope
             ));
 
             if (!$exists) {
                 $wpdb->insert(
-                    $table_name,
+                    $tableName,
                     array(
                         'scope' => $scope,
                         'description' => sprintf('Facts about client\'s purchases in the %s category', $category->name),
@@ -91,25 +91,25 @@ return new class {
         }
 
         // Insert additional scopes
-        $additional_scopes = array(
+        $additionalScopes = array(
             array(
                 'scope' => 'facts:wishlist',
                 'description' => 'Facts about items in the client\'s wishlist',
             )
         );
 
-        foreach ($additional_scopes as $scope_data) {
+        foreach ($additionalScopes as $scopeData) {
             $exists = $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM $table_name WHERE scope = %s",
-                $scope_data['scope']
+                "SELECT COUNT(*) FROM $tableName WHERE scope = %s",
+                $scopeData['scope']
             ));
 
             if (!$exists) {
                 $wpdb->insert(
-                    $table_name,
+                    $tableName,
                     array(
-                        'scope' => $scope_data['scope'],
-                        'description' => $scope_data['description'],
+                        'scope' => $scopeData['scope'],
+                        'description' => $scopeData['description'],
                     ),
                     array(
                         '%s',

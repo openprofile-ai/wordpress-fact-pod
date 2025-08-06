@@ -18,7 +18,7 @@ function wpfp_render_fact_pod_tab() {
         echo '<p>Only for registered users.</p>';
         return;
     }
-    $user_id = get_current_user_id();
+    $userId = get_current_user_id();
 
     $options = [
         'wpfp_purchases'  => get_option('wpfp_purchases', 'yes'),
@@ -51,11 +51,11 @@ function wpfp_render_fact_pod_tab() {
             'wpfp_reviews'    => 'Reviews',
         ];
 
-        foreach ($enabled as $key => $val) {
-            $meta = get_user_meta($user_id, $key, true);
+        foreach ($enabled as $key => $value) {
+            $meta = get_user_meta($userId, $key, true);
             if ($meta === '') {
-                update_user_meta($user_id, $key, $val);
-                $meta = $val;
+                update_user_meta($userId, $key, $value);
+                $meta = $value;
             }
             echo '<p><label><input type="checkbox" name="' . esc_attr($key) . '" ' . checked($meta, 'yes', false)
                 . '> ' . esc_html($labels[$key]) . '</label></p>';
@@ -72,9 +72,9 @@ add_action('template_redirect', function () {
     }
 
     if (wp_verify_nonce($_POST['wpfp_nonce'], 'wpfp_save_form')) {
-        $user = get_current_user_id();
+        $userId = get_current_user_id();
         foreach (['wpfp_purchases','wpfp_wish_lists','wpfp_reviews'] as $key) {
-            update_user_meta($user, $key, isset($_POST[$key]) ? 'yes' : 'no');
+            update_user_meta($userId, $key, isset($_POST[$key]) ? 'yes' : 'no');
         }
         wc_add_notice('Saved successfully.', 'success');
         wp_redirect(wc_get_account_endpoint_url('factpod'));

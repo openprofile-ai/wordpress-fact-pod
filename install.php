@@ -11,36 +11,36 @@ function wp_fact_pod_install(string $version) {
     ];
 
     if (isset($migrations[$version])) {
-        $migration_files = $migrations[$version];
+        $migrationFiles = $migrations[$version];
 
-        foreach ($migration_files as $migration_file) {
-            $migration = require_once WORDPRESS_FACT_POD_PATH . 'includes/Database/' . $migration_file;
+        foreach ($migrationFiles as $migrationFile) {
+            $migration = require_once WORDPRESS_FACT_POD_PATH . 'includes/Database/' . $migrationFile;
             $migration->up();
         }
     }
 }
 
 function wp_fact_pod_generate_keys() {
-    $key_dir = plugin_dir_path(__FILE__);
-    $private_key_file = $key_dir . 'private.key';
-    $public_key_file  = $key_dir . 'public.key';
+    $keyDir = plugin_dir_path(__FILE__);
+    $privateKeyFile = $keyDir . 'private.key';
+    $publicKeyFile  = $keyDir . 'public.key';
 
     // Only generate if keys do not exist
-    if (!file_exists($private_key_file) || !file_exists($public_key_file)) {
+    if (!file_exists($privateKeyFile) || !file_exists($publicKeyFile)) {
         $config = array(
             "private_key_bits" => 4096,
             "private_key_type" => OPENSSL_KEYTYPE_RSA,
         );
 
         $res = openssl_pkey_new($config);
-        openssl_pkey_export($res, $private_key);
-        $key_details = openssl_pkey_get_details($res);
-        $public_key = $key_details['key'];
+        openssl_pkey_export($res, $privateKey);
+        $keyDetails = openssl_pkey_get_details($res);
+        $publicKey = $keyDetails['key'];
 
-        file_put_contents($private_key_file, $private_key);
-        @chmod($private_key_file, 0600);
+        file_put_contents($privateKeyFile, $privateKey);
+        @chmod($privateKeyFile, 0600);
 
-        file_put_contents($public_key_file, $public_key);
-        @chmod($public_key_file, 0644);
+        file_put_contents($publicKeyFile, $publicKey);
+        @chmod($publicKeyFile, 0644);
     }
 }

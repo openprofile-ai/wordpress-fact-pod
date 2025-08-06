@@ -11,9 +11,9 @@ function wpfp_settings_page_html() {
         echo '<div class="updated"><p>Saved</p></div>';
     }
 
-    $option_purchases = get_option('wpfp_purchases', 'yes');
-    $option_wish_lists = get_option('wpfp_wish_lists', 'yes');
-    $option_reviews = get_option('wpfp_reviews', 'yes');
+    $optionPurchases = get_option('wpfp_purchases', 'yes');
+    $optionWishLists = get_option('wpfp_wish_lists', 'yes');
+    $optionReviews = get_option('wpfp_reviews', 'yes');
     ?>
 
     <div class="wrap">
@@ -23,19 +23,19 @@ function wpfp_settings_page_html() {
             <h3>Allowed to Share</h3>
                 <p>
                     <label for="wpfp_purchases">
-                        <input type="checkbox" name="wpfp_purchases" id="wpfp_purchases" <?php checked($option_purchases, 'yes'); ?> />
+                        <input type="checkbox" name="wpfp_purchases" id="wpfp_purchases" <?php checked($optionPurchases, 'yes'); ?> />
                         Purchases
                     </label>
                 </p>
                 <p>
                     <label for="wpfp_wish_lists">
-                        <input type="checkbox" name="wpfp_wish_lists" id="wpfp_wish_lists" <?php checked($option_wish_lists, 'yes'); ?> />
+                        <input type="checkbox" name="wpfp_wish_lists" id="wpfp_wish_lists" <?php checked($optionWishLists, 'yes'); ?> />
                         Wish Lists
                     </label>
                 </p>
                 <p>
                     <label for="wpfp_reviews">
-                        <input type="checkbox" name="wpfp_reviews" id="wpfp_reviews" <?php checked($option_reviews, 'yes'); ?> />
+                        <input type="checkbox" name="wpfp_reviews" id="wpfp_reviews" <?php checked($optionReviews, 'yes'); ?> />
                         Reviews
                     </label>
                 </p>

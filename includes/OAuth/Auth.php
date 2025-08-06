@@ -203,7 +203,7 @@ class Auth
         $scopes = $request->get_param('scopes');
 
         global $wpdb;
-        $table_name = $wpdb->prefix . 'fact_pod_oauth_scopes';
+        $tableName = $wpdb->prefix . 'fact_pod_oauth_scopes';
 
         if (!is_array($scopes) || empty($scopes)) {
             return new \WP_Error('invalid_scopes', 'Scopes must be a non-empty array.', array('status' => 400));
@@ -211,7 +211,7 @@ class Auth
 
         // Prepare for SQL IN clause
         $placeholders = implode(',', array_fill(0, count($scopes), '%s'));
-        $query = "SELECT scope FROM $table_name WHERE scope IN ($placeholders)";
+        $query = "SELECT scope FROM $tableName WHERE scope IN ($placeholders)";
         $results = $wpdb->get_col($wpdb->prepare($query, $scopes));
 
         // Find missing scopes
