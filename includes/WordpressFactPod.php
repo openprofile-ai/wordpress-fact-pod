@@ -18,12 +18,12 @@ class WordpressFactPod
     /**
      * Plugin path
      */
-    private string $plugin_path;
+    private string $pluginPath;
 
     /**
      * Plugin URL
      */
-    private string $plugin_url;
+    private string $pluginUrl;
 
     /**
      * Instance of this class
@@ -49,8 +49,8 @@ class WordpressFactPod
      */
     private function __construct()
     {
-        $this->plugin_path = plugin_dir_path(dirname(__FILE__));
-        $this->plugin_url = plugin_dir_url(dirname(__FILE__));
+        $this->pluginPath = plugin_dir_path(dirname(__FILE__));
+        $this->pluginUrl = plugin_dir_url(dirname(__FILE__));
 
         $this->define_constants();
         $this->init_hooks();
@@ -66,7 +66,7 @@ class WordpressFactPod
         }
 
         if (!defined('WORDPRESS_FACT_POD_PATH')) {
-            define('WORDPRESS_FACT_POD_PATH', $this->plugin_path);
+            define('WORDPRESS_FACT_POD_PATH', $this->pluginPath);
         }
     }
 
@@ -76,7 +76,7 @@ class WordpressFactPod
     private function init_hooks(): void
     {
         // Activation hooks - we need to use the main plugin file
-        register_activation_hook($this->plugin_path . 'wordpress-fact-pod.php', [$this, 'activate']);
+        register_activation_hook($this->pluginPath . 'wordpress-fact-pod.php', [$this, 'activate']);
 
         // Init hooks
         add_action('init', [$this, 'init']);
@@ -113,7 +113,7 @@ class WordpressFactPod
      */
     private function install(): void
     {
-        require_once $this->plugin_path . 'install.php';
+        require_once $this->pluginPath . 'install.php';
         wp_fact_pod_install();
     }
 
@@ -122,7 +122,7 @@ class WordpressFactPod
      */
     private function add_category_oauth_scopes(): void
     {
-        require_once $this->plugin_path . 'install.php';
+        require_once $this->pluginPath . 'install.php';
         add_category_oauth_scopes();
     }
 
@@ -131,7 +131,7 @@ class WordpressFactPod
      */
     private function generate_keys(): void
     {
-        require_once $this->plugin_path . 'install.php';
+        require_once $this->pluginPath . 'install.php';
         wp_fact_pod_generate_keys();
     }
 
@@ -158,8 +158,8 @@ class WordpressFactPod
      */
     private function init_oauth(): void
     {
-        $privateKey = $this->plugin_path . 'private.key';
-        $publicKey = $this->plugin_path . 'public.key';
+        $privateKey = $this->pluginPath . 'private.key';
+        $publicKey = $this->pluginPath . 'public.key';
 
         if (file_exists($privateKey) && file_exists($publicKey)) {
             new Auth($privateKey, $publicKey);
@@ -207,11 +207,11 @@ class WordpressFactPod
     public function handle_template_redirect(): void
     {
         if (get_query_var('wpfp_oauth_login')) {
-            include $this->plugin_path . 'templates/oauth-login.php';
+            include $this->pluginPath . 'templates/oauth-login.php';
             exit;
         }
         if (get_query_var('wpfp_oauth_scopes')) {
-            include $this->plugin_path . 'templates/oauth-scopes.php';
+            include $this->pluginPath . 'templates/oauth-scopes.php';
             exit;
         }
     }
@@ -222,7 +222,7 @@ class WordpressFactPod
     private function load_user_options(): void
     {
         if (!is_admin() && function_exists('is_user_logged_in') && is_user_logged_in()) {
-            require_once $this->plugin_path . 'src/user/user-options.php';
+            require_once $this->pluginPath . 'src/user/user-options.php';
         }
     }
 
@@ -242,7 +242,7 @@ class WordpressFactPod
         );
 
         if (is_admin()) {
-            require_once $this->plugin_path . 'src/admin/settings-page.php';
+            require_once $this->pluginPath . 'src/admin/settings-page.php';
         }
     }
 
@@ -251,7 +251,7 @@ class WordpressFactPod
      */
     public function enqueue_styles(): void
     {
-        wp_enqueue_style('fact-pod-styles', $this->plugin_url . 'assets/styles/fact-pod.css');
+        wp_enqueue_style('fact-pod-styles', $this->pluginUrl . 'assets/styles/fact-pod.css');
     }
 
     /**
@@ -261,7 +261,7 @@ class WordpressFactPod
     {
         wp_register_script(
             'fact-pod-script',
-            $this->plugin_url . 'assets/js/fact-pod.js',
+            $this->pluginUrl . 'assets/js/fact-pod.js',
             array('jquery'),
             '1.0',
             true
