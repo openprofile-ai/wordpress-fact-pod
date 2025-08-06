@@ -1,4 +1,6 @@
 <?php
+require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
 return new class {
     public function up()
     {

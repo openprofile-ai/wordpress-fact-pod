@@ -80,16 +80,16 @@ class WordpressFactPod
 
         // Init hooks
         add_action('init', [$this, 'init']);
-        
+
         // Query vars
         add_filter('query_vars', [$this, 'register_query_vars']);
-        
+
         // Template redirect
         add_action('template_redirect', [$this, 'handle_template_redirect']);
-        
+
         // Admin menu
         add_action('admin_menu', [$this, 'add_admin_menu']);
-        
+
         // Enqueue scripts and styles
         add_action('wp_enqueue_scripts', [$this, 'enqueue_styles']);
         add_action('wp_enqueue_scripts', [$this, 'enqueue_scripts']);
@@ -100,39 +100,13 @@ class WordpressFactPod
      */
     public function activate(): void
     {
-        $this->install();
-        $this->add_category_oauth_scopes();
-        $this->generate_keys();
-        
+        require_once $this->pluginPath . 'install.php';
+
+        wp_fact_pod_install(self::VERSION);
+        wp_fact_pod_generate_keys();
+
         update_option('wpfp_flush_rewrite', true);
         flush_rewrite_rules();
-    }
-
-    /**
-     * Install database tables
-     */
-    private function install(): void
-    {
-        require_once $this->pluginPath . 'install.php';
-        wp_fact_pod_install();
-    }
-
-    /**
-     * Add OAuth scopes
-     */
-    private function add_category_oauth_scopes(): void
-    {
-        require_once $this->pluginPath . 'install.php';
-        add_category_oauth_scopes();
-    }
-
-    /**
-     * Generate keys
-     */
-    private function generate_keys(): void
-    {
-        require_once $this->pluginPath . 'install.php';
-        wp_fact_pod_generate_keys();
     }
 
     /**
@@ -142,13 +116,13 @@ class WordpressFactPod
     {
         // Start session
         new Session();
-        
+
         // Initialize OAuth
         $this->init_oauth();
-        
+
         // Add rewrite rules
         $this->add_rewrite_rules();
-        
+
         // Load user options if user is logged in
         $this->load_user_options();
     }

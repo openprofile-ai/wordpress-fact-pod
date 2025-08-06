@@ -2,17 +2,22 @@
 
 defined('ABSPATH') || exit;
 
-require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-
-function wp_fact_pod_install() {
+function wp_fact_pod_install(string $version) {
     $migrations = [
         '0.0.1' => ['migration_v_0_0_1.php'],
 
-        // for future versions
+        // for future versions, list all needed migrations, including previous ones
         // '0.0.2' => ['migration_v_0_0_1.php', 'migration_v_0_0_2.php']
     ];
 
-    // Check current version, run needed migration files from array
+    if (isset($migrations[$version])) {
+        $migration_files = $migrations[$version];
+
+        foreach ($migration_files as $migration_file) {
+            $migration = require_once WORDPRESS_FACT_POD_PATH . 'includes/Database/' . $migration_file;
+            $migration->up();
+        }
+    }
 }
 
 function wp_fact_pod_generate_keys() {
