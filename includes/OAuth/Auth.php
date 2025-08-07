@@ -3,7 +3,6 @@
 namespace OpenProfile\WordpressFactPod\OAuth;
 
 use DateInterval;
-use Exception;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
@@ -82,7 +81,7 @@ class Auth
             array(
                 'methods' => 'POST',
                 'callback' => array($this, 'approve'),
-                'permission_callback' => array($this, 'check_auth_request'),
+                'permission_callback' => array($this, 'validate_auth_request_exists'),
                 'args' => array(
                     'scopes' => array(
                         'type' => 'array',
@@ -100,22 +99,37 @@ class Auth
             array(
                 'methods' => 'POST',
                 'callback' => array($this, 'deny'),
-                'permission_callback' => array($this, 'check_auth_request'),
+                'permission_callback' => array($this, 'validate_auth_request_exists'),
             )
         );
 
         register_rest_route(
             'openprofile/oauth',
-            '/token',
+            '/access_token',
             array(
                 'methods' => 'POST',
-                'callback' => array($this, 'token'),
+                'callback' => array($this, 'access_token'),
                 'permission_callback' => '__return_true',
             )
         );
     }
 
-    public function check_auth_request(): bool
+    public function validate_scopes_exist(WP_REST_Request $request)
+    {
+        $scopes = $request->get_param('scopes');
+
+        if (!is_array($scopes) || empty($scopes)) {
+            return new WP_Error('invalid_scopes', 'Scopes must be a non-empty array.', array('status' => 400));
+        }
+
+        if (!$this->scopeRepository->validateScopesExist($scopes)) {
+            return new WP_Error( 'invalid_scopes', 'Please provide valid scopes.', array('status' => 400));
+        }
+
+        return true;
+    }
+
+    public function validate_auth_request_exists(): bool
     {
         $data = Session::get('auth_request');
 
@@ -189,28 +203,31 @@ class Auth
         $authRequest->setAuthorizationApproved(false);
 
         try {
-            $this->server->completeAuthorizationRequest($authRequest, $response);
+            return Http::transform_to_wp_rest_response(
+                $this->server->completeAuthorizationRequest($authRequest, $response)
+            );
         } catch (OAuthServerException $exception) {
             return Http::transform_to_wp_rest_response(
                 $exception->generateHttpResponse($response)
             );
         }
-
-        return new \WP_REST_Response('Ok.', 200);
     }
 
-    public function validate_scopes_exist(WP_REST_Request $request)
+    public function access_token(WP_REST_Request $request): \WP_REST_Response
     {
-        $scopes = $request->get_param('scopes');
-
-        if (!is_array($scopes) || empty($scopes)) {
-            return new WP_Error('invalid_scopes', 'Scopes must be a non-empty array.', array('status' => 400));
+        $response = new Response();
+        
+        try {
+            return Http::transform_to_wp_rest_response(
+                $this->server->respondToAccessTokenRequest(
+                    Http::transform_to_psr7_request($request),
+                    $response
+                )
+            );
+        } catch (OAuthServerException $exception) {
+            return Http::transform_to_wp_rest_response(
+                $exception->generateHttpResponse($response)
+            );
         }
-
-        if (!$this->scopeRepository->validateScopesExist($scopes)) {
-            return new WP_Error( 'invalid_scopes', 'Please provide valid scopes.', array('status' => 400));
-        }
-
-        return true;
     }
 }

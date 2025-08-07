@@ -40,8 +40,7 @@ class ClientRepository implements ClientRepositoryInterface
 
         $client = $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM $table WHERE id = %s",
-                $clientIdentifier
+                "SELECT * FROM $table WHERE id = %s", $clientIdentifier
             )
         );
 
@@ -49,7 +48,7 @@ class ClientRepository implements ClientRepositoryInterface
             return false;
         }
 
-        if (!$clientSecret || !password_verify($client->secret, $clientSecret)) {
+        if (!$clientSecret || !password_verify($clientSecret, $client->secret)) {
             return false;
         }
 
