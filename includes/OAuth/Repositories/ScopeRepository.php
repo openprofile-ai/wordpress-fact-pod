@@ -12,6 +12,7 @@ class ScopeRepository implements ScopeRepositoryInterface
     public function getScopeEntityByIdentifier(string $identifier): ?ScopeEntityInterface
     {
         global $wpdb;
+
         $table = $wpdb->prefix . 'fact_pod_oauth_scopes';
 
         $scopeRow = $wpdb->get_row(
@@ -23,6 +24,21 @@ class ScopeRepository implements ScopeRepositoryInterface
         }
 
         return new ScopeEntity($scopeRow->scope, $scopeRow->description);
+    }
+
+    public function validateScopesExist(array $scopes = []): bool
+    {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'fact_pod_oauth_scopes';
+
+        $placeholders = implode(',', array_fill(0, count($scopes), '%s'));
+        $query = "SELECT scope FROM $table WHERE scope IN ($placeholders)";
+
+        $results = $wpdb->get_col($wpdb->prepare($query, $scopes));
+        $missing = array_diff($scopes, $results);
+
+        return empty($missing);
     }
 
     public function finalizeScopes(array $scopes, string $grantType, ClientEntityInterface $clientEntity, ?string $userIdentifier = null, ?string $authCodeId = null): array

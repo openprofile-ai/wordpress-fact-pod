@@ -28,6 +28,7 @@ include WORDPRESS_FACT_POD_PATH . 'templates/header-factpod.php';
     </div>
     <h2>Sign up to <?php echo $authRequest->getClient()->getName() ?></h2>
     <form action="/wp-json/openprofile/oauth/approve" class="fact-pod-form" method="post" id="oauth-scopes-form">
+        <input type="hidden" name="_wpnonce" value="<?php echo wp_create_nonce('wp_rest'); ?>" />
         <?php foreach ($authRequest->getScopes() as $scope) { ?>
             <label><input type="checkbox" value="<?php echo $scope->getIdentifier() ?>" name="scopes[]" /> <?php echo $scope->getDescription() ?></label>
         <?php } ?>

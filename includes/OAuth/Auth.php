@@ -7,6 +7,7 @@ use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
 use League\OAuth2\Server\RequestTypes\AuthorizationRequestInterface;
 use Nyholm\Psr7\Response;
+use OpenProfile\WordpressFactPod\OAuth\Entities\ScopeEntity;
 use OpenProfile\WordpressFactPod\OAuth\Entities\UserEntity;
 use OpenProfile\WordpressFactPod\OAuth\Repositories\AccessTokenRepository;
 use OpenProfile\WordpressFactPod\OAuth\Repositories\AuthCodeRepository;
@@ -19,6 +20,7 @@ use OpenProfile\WordpressFactPod\Utils\Session;
 class Auth
 {
     private AuthorizationServer $server;
+    private ScopeRepository $scopeRepository;
 
     public function __construct(private string $privateKey, private string $encryptionKey)
     {
@@ -30,7 +32,7 @@ class Auth
     public function init_oauth_server(): void
     {
         $clientRepository = new ClientRepository();
-        $scopeRepository = new ScopeRepository();
+        $this->scopeRepository = new ScopeRepository();
         $accessTokenRepository = new AccessTokenRepository();
         $authCodeRepository = new AuthCodeRepository();
         $refreshTokenRepository = new RefreshTokenRepository();
@@ -40,7 +42,7 @@ class Auth
         $this->server = new AuthorizationServer(
             $clientRepository,
             $accessTokenRepository,
-            $scopeRepository,
+            $this->scopeRepository,
             $this->privateKey,
             $this->encryptionKey
         );
@@ -164,15 +166,18 @@ class Auth
         }
 
         $response = new Response();
+        $scopes = [];
 
         /** @var AuthorizationRequestInterface $authRequest */
         $authRequest = Session::get('auth_request');
 
         $authRequest->setUser(new UserEntity(wp_get_current_user()));
         $authRequest->setAuthorizationApproved(true);
-        $authRequest->setScopes();
 
-        // TODO Store in the DB approved OpenProfile permissions
+        foreach ($request->get_param('scopes') as $scope) {
+            $scopes[] = new ScopeEntity($scope);
+        }
+        $authRequest->setScopes($scopes);
 
         return Http::transform_to_wp_rest_response(
             $this->server->completeAuthorizationRequest($authRequest, $response)
@@ -202,25 +207,14 @@ class Auth
     {
         $scopes = $request->get_param('scopes');
 
-        global $wpdb;
-        $tableName = $wpdb->prefix . 'fact_pod_oauth_scopes';
-
         if (!is_array($scopes) || empty($scopes)) {
             return new \WP_Error('invalid_scopes', 'Scopes must be a non-empty array.', array('status' => 400));
         }
 
-        // Prepare for SQL IN clause
-        $placeholders = implode(',', array_fill(0, count($scopes), '%s'));
-        $query = "SELECT scope FROM $tableName WHERE scope IN ($placeholders)";
-        $results = $wpdb->get_col($wpdb->prepare($query, $scopes));
-
-        // Find missing scopes
-        $missing = array_diff($scopes, $results);
-
-        if (!empty($missing)) {
+        if (!$this->scopeRepository->validateScopesExist($scopes)) {
             return new \WP_Error(
                 'invalid_scopes',
-                'The following scopes do not exist: ' . implode(', ', $missing),
+                'Please provide valid scopes.',
                 array('status' => 400)
             );
         }
