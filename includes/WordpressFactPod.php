@@ -52,15 +52,6 @@ class WordpressFactPod
         $this->pluginPath = plugin_dir_path(dirname(__FILE__));
         $this->pluginUrl = plugin_dir_url(dirname(__FILE__));
 
-        $this->define_constants();
-        $this->init_hooks();
-    }
-
-    /**
-     * Define plugin constants
-     */
-    private function define_constants(): void
-    {
         if (!defined('WORDPRESS_FACT_POD_VERSION')) {
             define('WORDPRESS_FACT_POD_VERSION', self::VERSION);
         }
@@ -68,26 +59,28 @@ class WordpressFactPod
         if (!defined('WORDPRESS_FACT_POD_PATH')) {
             define('WORDPRESS_FACT_POD_PATH', $this->pluginPath);
         }
+
+        $this->init();
     }
 
     /**
-     * Initialize hooks
+     * Initialize plugin
      */
-    private function init_hooks(): void
+    private function init(): void
     {
-        // Activation hooks - we need to use the main plugin file
+        // Activation hooks
         register_activation_hook($this->pluginPath . 'wordpress-fact-pod.php', [$this, 'activate']);
 
-        // Init hooks
-        add_action('init', [$this, 'init']);
+        // Start session
+        new Session();
 
-        // Query vars
-        add_filter('query_vars', [$this, 'register_query_vars']);
+        // Initialize OAuth
+        $this->init_oauth();
 
-        // Template redirect
-        add_action('template_redirect', [$this, 'handle_template_redirect']);
+        // Load user options if user is logged in
+        $this->add_user_options();
 
-        // Admin menu
+        // Add section to admin menu
         add_action('admin_menu', [$this, 'add_admin_menu']);
 
         // Enqueue scripts and styles
@@ -110,90 +103,62 @@ class WordpressFactPod
     }
 
     /**
-     * Initialize plugin
-     */
-    public function init(): void
-    {
-        // Start session
-        new Session();
-
-        // Initialize OAuth
-        $this->init_oauth();
-
-        // Add rewrite rules
-        $this->add_rewrite_rules();
-
-        // Load user options if user is logged in
-        $this->load_user_options();
-    }
-
-    /**
      * Initialize OAuth
      */
     private function init_oauth(): void
     {
-        $privateKey = $this->pluginPath . 'private.key';
-        $publicKey = $this->pluginPath . 'public.key';
+        add_action('init', function () {
+            add_rewrite_rule(
+                '^openprofile/oauth/login/?$',
+                'index.php?wpfp_oauth_login=1',
+                'top'
+            );
 
-        if (file_exists($privateKey) && file_exists($publicKey)) {
-            new Auth($privateKey, $publicKey);
-        } else {
-            error_log('[FactPod] Missing private or public key at init.');
-        }
-    }
+            add_rewrite_rule(
+                '^openprofile/oauth/scopes/?$',
+                'index.php?wpfp_oauth_scopes=1',
+                'top'
+            );
 
-    /**
-     * Add rewrite rules
-     */
-    private function add_rewrite_rules(): void
-    {
-        add_rewrite_rule(
-            '^openprofile/oauth/login/?$',
-            'index.php?wpfp_oauth_login=1',
-            'top'
-        );
+            if (get_option('wpfp_flush_rewrite')) {
+                flush_rewrite_rules();
+                delete_option('wpfp_flush_rewrite');
+            }
+        });
 
-        add_rewrite_rule(
-            '^openprofile/oauth/scopes/?$',
-            'index.php?wpfp_oauth_scopes=1',
-            'top'
-        );
+        add_filter('query_vars', function ($vars) {
+            $vars[] = 'wpfp_oauth_login';
+            $vars[] = 'wpfp_oauth_scopes';
+            return $vars;
+        });
 
-        if (get_option('wpfp_flush_rewrite')) {
-            flush_rewrite_rules();
-            delete_option('wpfp_flush_rewrite');
-        }
-    }
+        add_action('template_redirect', function () {
+            if (get_query_var('wpfp_oauth_login')) {
+                include $this->pluginPath . 'templates/oauth-login.php';
+                exit;
+            }
+            if (get_query_var('wpfp_oauth_scopes')) {
+                include $this->pluginPath . 'templates/oauth-scopes.php';
+                exit;
+            }
+        });
 
-    /**
-     * Register query vars
-     */
-    public function register_query_vars($vars): array
-    {
-        $vars[] = 'wpfp_oauth_login';
-        $vars[] = 'wpfp_oauth_scopes';
-        return $vars;
-    }
+        add_action('init', function () {
+            $privateKey = $this->pluginPath . 'private.key';
+            $publicKey = $this->pluginPath . 'public.key';
 
-    /**
-     * Handle template redirect
-     */
-    public function handle_template_redirect(): void
-    {
-        if (get_query_var('wpfp_oauth_login')) {
-            include $this->pluginPath . 'templates/oauth-login.php';
-            exit;
-        }
-        if (get_query_var('wpfp_oauth_scopes')) {
-            include $this->pluginPath . 'templates/oauth-scopes.php';
-            exit;
-        }
+            if (file_exists($privateKey) && file_exists($publicKey)) {
+                new Auth($privateKey, $publicKey);
+            } else {
+                error_log('[FactPod] Missing private or public key at init.');
+            }
+        });
     }
 
     /**
      * Load user options if user is logged in
      */
-    private function load_user_options(): void
+    private function add_user_options(): void
     {
         if (!is_admin() && function_exists('is_user_logged_in') && is_user_logged_in()) {
             require_once $this->pluginPath . 'src/user/user-options.php';
