@@ -5,10 +5,12 @@ namespace OpenProfile\WordpressFactPod\Utils;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use WP_REST_Request;
+use WP_REST_Response;
 
 class Http
 {
-    public static function transform_to_psr7_request( \WP_REST_Request $wpRequest ): ServerRequestInterface {
+    public static function transform_to_psr7_request( WP_REST_Request $wpRequest ): ServerRequestInterface {
         $psr17Factory = new Psr17Factory();
 
         $psrRequest = $psr17Factory->createServerRequest(
@@ -35,7 +37,7 @@ class Http
         return $psrRequest;
     }
 
-    public static function transform_to_wp_rest_response( ResponseInterface $psrResponse ): \WP_REST_Response
+    public static function transform_to_wp_rest_response( ResponseInterface $psrResponse ): WP_REST_Response
     {
         $status = $psrResponse->getStatusCode();
         $headers = [];
@@ -46,6 +48,6 @@ class Http
 
         $body = (string) $psrResponse->getBody();
 
-        return new \WP_REST_Response( $body, $status, $headers );
+        return new WP_REST_Response( $body, $status, $headers );
     }
 }

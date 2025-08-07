@@ -153,6 +153,11 @@ class WordpressFactPod
                 error_log('[FactPod] Missing private or public key at init.');
             }
         });
+
+        add_action('wp_login', function () {
+            wp_redirect('/openprofile/oauth/scopes/');
+            exit;
+        });
     }
 
     /**

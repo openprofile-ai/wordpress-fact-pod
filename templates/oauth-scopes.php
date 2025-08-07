@@ -22,21 +22,32 @@ if (is_null($authRequest) || is_null($user)) {
 include WORDPRESS_FACT_POD_PATH . 'templates/header-factpod.php';
 ?>
 
-
 <div class="fact-pod-form box">
     <div class="logo">
     </div>
     <h2>Sign up to <?php echo $authRequest->getClient()->getName() ?></h2>
-    <form action="/wp-json/openprofile/oauth/approve" class="fact-pod-form" method="post" id="oauth-scopes-form">
+
+    <!-- Approve Form -->
+    <form action="/wp-json/openprofile/oauth/approve" class="fact-pod-form" method="post" id="approve-form">
         <input type="hidden" name="_wpnonce" value="<?php echo wp_create_nonce('wp_rest'); ?>" />
         <?php foreach ($authRequest->getScopes() as $scope) { ?>
-            <label><input type="checkbox" value="<?php echo $scope->getIdentifier() ?>" name="scopes[]" /> <?php echo $scope->getDescription() ?></label>
+            <label>
+                <input type="checkbox" checked value="<?php echo $scope->getIdentifier() ?>" name="scopes[]" />
+                <?php echo $scope->getDescription() ?>
+            </label>
         <?php } ?>
-        <p>
-            <button type="submit" class="button">Approve</button>
-            <a href="/openprofile/oauth/login/" class="button">Cancel</a>
-        </p>
     </form>
+
+    <!-- Deny Form -->
+    <form action="/wp-json/openprofile/oauth/deny" method="post" id="deny-form">
+        <input type="hidden" name="_wpnonce" value="<?php echo wp_create_nonce('wp_rest'); ?>" />
+    </form>
+
+    <!-- Buttons Layer -->
+    <div class="form-actions">
+        <button type="submit" form="approve-form" class="button">Approve</button>
+        <button type="submit" form="deny-form" class="button">Deny</button>
+    </div>
 </div>
 
 <?php

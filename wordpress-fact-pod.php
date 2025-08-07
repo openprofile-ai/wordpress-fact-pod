@@ -6,6 +6,8 @@
  * Author: OpenProfile Team
  */
 
+use OpenProfile\WordpressFactPod\WordpressFactPod;
+
 defined('ABSPATH') || exit;
 
 // Check if Composer autoloader exists.
@@ -31,7 +33,7 @@ set_error_handler(function($errno, $errstr, $errfile, $errline) {
 
 // Initialize the plugin
 function wordpress_fact_pod_init() {
-    return \OpenProfile\WordpressFactPod\WordpressFactPod::get_instance();
+    return WordpressFactPod::get_instance();
 }
 
 // Start the plugin
