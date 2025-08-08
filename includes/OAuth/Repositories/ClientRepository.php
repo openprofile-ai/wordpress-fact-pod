@@ -53,7 +53,7 @@ class ClientRepository implements ClientRepositoryInterface
         }
 
         if ($client->grant_types) {
-            $allowed = array_map('trim', explode(',', $client->grant_types));
+            $allowed = array_map('trim', explode(' ', $client->grant_types));
             if (!in_array($grantType, $allowed, true)) {
                 return false;
             }

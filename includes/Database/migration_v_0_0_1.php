@@ -81,7 +81,7 @@ return new class {
                     $tableName,
                     array(
                         'scope' => $scope,
-                        'description' => sprintf('Facts about client\'s purchases in the %s category', $category->name),
+                        'description' => sprintf('Purchases in the %s category', $category->name),
                     ),
                     array(
                         '%s',
@@ -94,7 +94,7 @@ return new class {
         $additionalScopes = array(
             array(
                 'scope' => 'facts:wishlist',
-                'description' => 'Facts about items in the client\'s wishlist',
+                'description' => 'Items in your wishlist',
             )
         );
 

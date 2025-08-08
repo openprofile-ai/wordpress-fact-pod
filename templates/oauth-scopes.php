@@ -22,10 +22,12 @@ if (is_null($authRequest) || is_null($user)) {
 include WORDPRESS_FACT_POD_PATH . 'templates/header-factpod.php';
 ?>
 
-<div class="fact-pod-form box">
+<div class="fact-pod oauth-scopes box">
     <div class="logo">
     </div>
     <h2>Sign up to <?php echo $authRequest->getClient()->getName() ?></h2>
+    
+    <p class="oauth-explanation">You are about to provide OAuth permissions to access your data. Please review the requested permissions below before proceeding.</p>
 
     <!-- Approve Form -->
     <form action="/wp-json/openprofile/oauth/approve" class="fact-pod-form" method="post" id="approve-form">
@@ -45,8 +47,8 @@ include WORDPRESS_FACT_POD_PATH . 'templates/header-factpod.php';
 
     <!-- Buttons Layer -->
     <div class="form-actions">
-        <button type="submit" form="approve-form" class="button">Approve</button>
-        <button type="submit" form="deny-form" class="button">Deny</button>
+        <button type="submit" form="approve-form" class="button approve-form">Approve</button>
+        <button type="submit" form="deny-form" class="button deny-form">Deny</button>
     </div>
 </div>
 
