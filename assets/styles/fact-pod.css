@@ -1,365 +1,84 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+/* Fact Pod Styles */
 
-body {
-    font-family: 'Roboto', 'Google Sans', Arial, sans-serif;
-    background-color: #f8f9fa;
+/* Center the form in the middle of the screen */
+.fact-pod {
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
+    margin: 0 auto;
+    max-width: 600px;
     padding: 20px;
-    box-sizing: border-box;
-}
-
-.fact-pod-form.box {
-    background-color: #ffffff;
-    padding: 48px 40px 36px;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-    text-align: center;
-    width: 100%;
-    max-width: 448px;
-    box-sizing: border-box;
-}
-
-.logo {
-    width: 100px;
-    height: 70px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 24px;
-    background-image: url("../../assets/img/fact_pod_logo.png");
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-}
-
-.fact-pod-form h2 {
-    font-size: 24px;
-    color: #202124;
-    font-weight: 400;
-    margin-top: 0;
-    margin-bottom: 8px;
-}
-
-.fact-pod-form p:first-of-type {
-    font-size: 16px;
-    color: #5f6368;
-    font-weight: 400;
-    margin-top: 0;
-    margin-bottom: 32px;
-}
-
-.woocommerce-form {
-    text-align: left;
-}
-
-.woocommerce-form p.form-row {
     position: relative;
-    margin-bottom: 24px;
-    padding: 0;
+    margin-top: 50px;
+    margin-bottom: 50px;
 }
 
-/* ОНОВЛЕНІ СТИЛІ ДЛЯ ПОЛІВ ВВОДУ */
-.woocommerce-form .input-text {
+/* Create a 2-column layout for labels with fallback to scrolling */
+.fact-pod-form {
     width: 100%;
-    padding: 18px 15px 18px;
-    font-size: 16px;
-    border: 1px solid #dadce0;
-    border-radius: 4px;
-    box-sizing: border-box;
-    outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    color: #202124;
-    -webkit-appearance: none;
-    z-index: 2;
-    background: transparent;
-    position: relative;
-}
-
-.woocommerce-form .input-text:focus {
-    border-color: #1a73e8;
-    box-shadow: 0 0 0 1px #1a73e8;
-}
-
-/* ОНОВЛЕНІ СТИЛІ ДЛЯ ЛЕЙБЛІВ */
-.woocommerce-form label {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 16px;
-    color: #80868b;
-    pointer-events: none;
-    transition: top 0.2s ease, font-size 0.2s ease, color 0.2s ease, transform 0.2s ease;
-    background: #fff;
-    padding: 0 4px;
-    margin-left: -4px;
-    z-index: 3;
-}
-
-.woocommerce-form p.form-row.is-focused label,
-.woocommerce-form p.form-row.has-value label {
-    top: -8px;
-    font-size: 12px;
-    color: #1a73e8; 
-    transform: translateY(0);
-}
-
-.woocommerce-form p.form-row.has-value:not(.is-focused) label {
-    color: #5f6368;
-}
-
-.woocommerce-form label .screen-reader-text {
-    display: none;
-}
-
-.woocommerce-form label .required {
-    position: absolute;
-    right: -10px;
-    top: -2px;
-    color: #ea4335;
-}
-
-.woocommerce-form__label-for-checkbox {
+    max-height: 300px;
+    overflow-y: auto;
     display: flex;
-    align-items: center;
-    font-size: 14px;
-    color: #5f6368;
-    margin-bottom: 20px;
-    cursor: pointer;
+    flex-wrap: wrap;
 }
 
-.woocommerce-form__input-checkbox {
-    margin-right: 8px;
-    width: 16px;
-    height: 16px;
-    border: 1px solid #dadce0;
-    border-radius: 2px;
-    vertical-align: middle;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    outline: none;
-    cursor: pointer;
-    position: relative;
-    display: inline-block;
-}
-
-.woocommerce-form__input-checkbox:checked {
-    background-color: #1a73e8;
-    border-color: #1a73e8;
-}
-
-.woocommerce-form__input-checkbox:checked::before {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 5px;
-    width: 4px;
-    height: 9px;
-    border: solid #fff;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
-
-.woocommerce-button.button.woocommerce-form-login__submit {
-    background-color: #1a73e8;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 10px 24px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease;
-    min-width: 90px;
-    float: right;
-    margin-bottom: 20px;
-}
-
-.woocommerce-button.button.woocommerce-form-login__submit:hover {
-    background-color: #174ea6;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-}
-
-.woocommerce-button.button.woocommerce-form-login__submit:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(26,115,232,0.4);
-}
-
-.lost_password {
-    text-align: left;
-    font-size: 14px;
-    margin-top: 5px;
-    margin-bottom: 32px;
-    float: left;
-    width: 100%;
+.fact-pod-form label {
+    display: block;
+    margin-bottom: 10px;
+    width: 50%;
+    padding-right: 10px;
     box-sizing: border-box;
+    font-weight: normal;
 }
 
-.lost_password a {
-    color: #1a73e8;
-    text-decoration: none;
-    font-weight: 500;
+/* For small screens, revert to single column */
+@media (max-width: 480px) {
+    .fact-pod-form label {
+        width: 100%;
+    }
 }
 
-.lost_password a:hover {
-    text-decoration: underline;
+/* Ensure any paragraph tags also appear on dedicated lines */
+.fact-pod p {
+    display: block;
+    margin-bottom: 10px;
+    width: 100%;
 }
 
-.clear {
-    clear: both;
-    height: 0;
-    overflow: hidden;
-}
-
-footer {
-    position: absolute;
-    bottom: 0;
-}
-
-/* НОВІ СТИЛІ ДЛЯ ФОРМИ oauth-scopes-form */
-form#oauth-scopes-form {
-    text-align: left;
-    margin-top: 20px;
-}
-
-form#oauth-scopes-form label {
-    display: flex;
-    align-items: flex-start;
-    font-size: 14px;
-    color: #202124;
-    margin-bottom: 24px;
-    cursor: pointer;
+/* Style for OAuth explanation text */
+.fact-pod .oauth-explanation {
+    background-color: #f8f9fa;
+    border-left: 4px solid #4285f4;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    font-size: 0.95em;
     line-height: 1.5;
 }
 
-form#oauth-scopes-form input[type="checkbox"] {
-    margin-right: 12px;
-    flex-shrink: 0;
-    width: 18px;
-    height: 18px;
-    border: 1px solid #dadce0;
-    border-radius: 2px;
-    vertical-align: middle;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    outline: none;
-    cursor: pointer;
-    position: relative;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+/* Style for the box container */
+.fact-pod.box, .fact-pod .box {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 30px;
 }
 
-form#oauth-scopes-form input[type="checkbox"]:checked {
-    background-color: #1a73e8;
-    border-color: #1a73e8;
+/* Form actions styling */
+.fact-pod .form-actions {
+    display: block;
+    margin-top: 20px;
+    width: 100%;
+    text-align: left;
 }
 
-form#oauth-scopes-form input[type="checkbox"]:checked::before {
-    content: '';
-    position: absolute;
-    top: 3px;
-    left: 6px;
-    width: 4px;
-    height: 8px;
-    border: solid #fff;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
+.fact-pod .form-actions::after {
+    content: "";
+    display: table;
+    clear: both;
 }
 
-form#oauth-scopes-form input[type="checkbox"]:focus {
-    box-shadow: 0 0 0 2px rgba(26,115,232,0.4);
-    border-color: #1a73e8;
-}
-
-form#oauth-scopes-form p {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 36px;
-    margin-bottom: 0;
-}
-
-form#oauth-scopes-form button[type="submit"].button {
-    background-color: #1a73e8;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 10px 24px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease;
-    min-width: 90px;
-    text-decoration: none;
-    display: inline-block;
-    box-sizing: border-box;
-}
-
-form#oauth-scopes-form button[type="submit"].button:hover {
-    background-color: #174ea6;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-}
-
-form#oauth-scopes-form button[type="submit"].button:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(26,115,232,0.4);
-}
-
-form#oauth-scopes-form a.button {
-    color: #1a73e8;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 8px 16px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-    display: inline-block;
-    box-sizing: border-box;
-}
-
-form#oauth-scopes-form a.button:hover {
-    background-color: rgba(66, 133, 244, 0.04);
-    text-decoration: none;
-}
-
-form#oauth-scopes-form a.button:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(26,115,232,0.4);
-}
-
-@media (max-width: 500px) {
-    body {
-        background-color: #ffffff;
-    }
-
-    .fact-pod-form.box {
-        padding: 32px 24px 24px;
-        box-shadow: none;
-        border-radius: 0;
-        max-width: 100%;
-    }
-
-    form#oauth-scopes-form p {
-        flex-direction: column-reverse;
-        align-items: stretch;
-    }
-
-    form#oauth-scopes-form button[type="submit"].button,
-    form#oauth-scopes-form a.button {
-        width: 100%;
-        text-align: center;
-        margin-top: 12px;
-        padding: 12px 24px;
-    }
-
-    form#oauth-scopes-form a.button {
-        order: 2;
-    }
-    form#oauth-scopes-form button[type="submit"].button {
-        order: 1;
-    }
+.fact-pod .form-actions button {
+    margin-right: 10px;
+    float: right;
 }
