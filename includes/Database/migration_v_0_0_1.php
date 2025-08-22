@@ -69,7 +69,6 @@ return new class {
         dbDelta($sqlScopes);
         dbDelta($sqlAccessTokens);
 
-
         $wpdb->query("
             ALTER TABLE {$prefix}oauth_refresh_tokens
             ADD CONSTRAINT fk_access_token
@@ -77,7 +76,6 @@ return new class {
             REFERENCES {$prefix}oauth_access_tokens(access_token)
             ON DELETE CASCADE
     ");
-
 
         $this->addOauthScopes();
     }

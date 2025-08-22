@@ -140,19 +140,21 @@ class WordpressFactPod
             $wellKnownType = get_query_var('wpfp_well_known');
             
             if ($wellKnownType) {
-                $uploadDir = wp_upload_dir();
-                $filePath = '';
-                
+                $optionKey = '';
                 if ($wellKnownType === 'openprofile') {
-                    $filePath = $uploadDir['basedir'] . '/openprofile/well-known/openprofile.json';
+                    $optionKey = 'wpfp_openprofile';
                 } elseif ($wellKnownType === 'openprofile-jwks') {
-                    $filePath = $uploadDir['basedir'] . '/openprofile/well-known/openprofile-jwks.json';
+                    $optionKey = 'wpfp_openprofile_jwks';
                 }
                 
-                if (!empty($filePath) && file_exists($filePath)) {
-                    header('Content-Type: application/json');
-                    readfile($filePath);
-                    exit;
+                if (!empty($optionKey)) {
+                    $optionValue = get_option($optionKey);
+                    
+                    if ($optionValue) {
+                        header('Content-Type: application/json');
+                        echo $optionValue;
+                        exit;
+                    }
                 }
             }
         });
