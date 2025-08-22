@@ -100,47 +100,16 @@ class Register extends AbstractRepository
             
             $name = $request->get_param('name');
             $redirectUri = $request->get_param('redirect_uri');
-            $grantTypes = ['authorization_code', 'refresh_token'];
-            $domain = parse_url($redirectUri, PHP_URL_HOST);
 
-            // Insert the client into the database
-            $wpdb = self::getDB();
-            $result = $wpdb->insert(
-                $this->clientRepository->getTable(),
-                array(
-                    'id'           => $clientId,
-                    'name'         => $name,
-                    'secret'       => $clientSecret,
-                    'redirect_uri' => $redirectUri,
-                    'domain'       => $domain,
-                    'grant_types'  => $grantTypes,
-                ),
-                array(
-                    '%s',
-                    '%s',
-                    '%s',
-                    '%s',
-                    '%s',
-                    '%s',
-                )
-            );
+            $this->clientRepository->createClient($clientId, $clientSecret, $name, $redirectUri);
             
-            if ($result === false) {
-                return new WP_Error(
-                    'client_registration_failed',
-                    'Failed to register client: ' . $wpdb->last_error,
-                    array('status' => 500)
-                );
-            }
-            
-            // Return the client ID and secret
             return new WP_REST_Response(
                 array(
                     'client_id'     => $clientId,
                     'client_secret' => $clientSecretRaw,
                     'name'          => $name,
                     'redirect_uri'  => $redirectUri,
-                    'grant_types'   => $grantTypes,
+                    'grant_types'   => ClientRepository::GRAND_TYPES,
                 ),
                 201
             );

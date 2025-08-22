@@ -9,10 +9,13 @@ use OpenProfile\WordpressFactPod\Utils\AbstractRepository;
 
 class ClientRepository extends AbstractRepository implements ClientRepositoryInterface
 {
+    const array GRAND_TYPES = ['authorization_code', 'refresh_token'];
+
     public function getTable(): string
     {
         return self::getPrefix() . 'oauth_clients';
     }
+
     public function getClientEntity(string $clientIdentifier): ?ClientEntityInterface
     {
         $wpdb = self::getDB();
@@ -64,13 +67,7 @@ class ClientRepository extends AbstractRepository implements ClientRepositoryInt
 
         return true;
     }
-    
-    /**
-     * Check if a client with the given domain already exists
-     *
-     * @param string $domain The domain to check
-     * @return bool True if a client with the domain exists, false otherwise
-     */
+
     public function domainExists(string $domain): bool
     {
         $wpdb = self::getDB();
@@ -84,5 +81,40 @@ class ClientRepository extends AbstractRepository implements ClientRepositoryInt
         );
         
         return $existingClient !== null;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function createClient(string $clientId, string $name, string $clientSecret, string $redirectUri): void
+    {
+        $wpdb = self::getDB();
+        $domain = parse_url($redirectUri, PHP_URL_HOST);
+
+        $result = $wpdb->insert(
+            $this->getTable(),
+            array(
+                'id'           => $clientId,
+                'name'         => $name,
+                'secret'       => $clientSecret,
+                'redirect_uri' => $redirectUri,
+                'domain'       => $domain,
+                'grant_types'  => self::GRAND_TYPES,
+            ),
+            array(
+                '%s',
+                '%s',
+                '%s',
+                '%s',
+                '%s',
+                '%s',
+            )
+        );
+
+        if ($result === false) {
+            error_log('Failed to create client: ' . $wpdb->last_error);
+
+            throw new \Exception('Failed to create client.');
+        }
     }
 }
