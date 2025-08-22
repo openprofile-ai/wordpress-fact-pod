@@ -55,4 +55,14 @@ class ScopeRepository extends AbstractRepository implements ScopeRepositoryInter
         // For now, just return scopes as-is
         return $scopes;
     }
+
+    public function getSupportedScopes(): array
+    {
+        $wpdb = self::getDB();
+        $table = $this->getTable();
+        
+        $results = $wpdb->get_col("SELECT scope FROM $table WHERE is_active=1");
+        
+        return $results ?: [];
+    }
 }

@@ -2,6 +2,8 @@
 
 defined('ABSPATH') || exit;
 
+use OpenProfile\WordpressFactPod\Utils\WellKnown;
+
 function wp_fact_pod_install(string $version) {
     $migrations = [
         '0.0.1' => ['migration_v_0_0_1.php'],
@@ -18,10 +20,13 @@ function wp_fact_pod_install(string $version) {
             $migration->up();
         }
     }
+    
+    // Generate and publish well-known files
+    wp_fact_pod_publish_well_known_files();
 }
 
 function wp_fact_pod_generate_keys() {
-    $keyDir = plugin_dir_path(__FILE__);
+    $keyDir = WORDPRESS_FACT_POD_PATH;
     $privateKeyFile = $keyDir . 'private.key';
     $publicKeyFile  = $keyDir . 'public.key';
 
@@ -43,4 +48,29 @@ function wp_fact_pod_generate_keys() {
         file_put_contents($publicKeyFile, $publicKey);
         @chmod($publicKeyFile, 0644);
     }
+}
+
+function wp_fact_pod_publish_well_known_files() {
+    $siteUrl = get_site_url();
+    
+    // Create .well-known directory if it doesn't exist
+    $wellKnownDir = ABSPATH . '.well-known';
+    if (!file_exists($wellKnownDir)) {
+        wp_mkdir_p($wellKnownDir);
+    }
+    
+    // Generate the JWKS
+    $publicKeyPath = WORDPRESS_FACT_POD_PATH . 'public.key';
+    $jwks = WellKnown::generateJwks($publicKeyPath);
+    
+    // Generate the OpenProfile discovery document
+    $openProfileDiscovery = WellKnown::generateOpenProfileDiscovery($siteUrl);
+    
+    // Write the files
+    file_put_contents($wellKnownDir . '/openprofile-jwks.json', json_encode($jwks, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    file_put_contents($wellKnownDir . '/openprofile.json', json_encode($openProfileDiscovery, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    
+    // Set proper permissions
+    @chmod($wellKnownDir . '/openprofile-jwks.json', 0644);
+    @chmod($wellKnownDir . '/openprofile.json', 0644);
 }
