@@ -63,20 +63,21 @@ class Register extends AbstractRepository
             );
         }
         
-        // Check if redirect_uri already exists
-        $wpdb = self::getDB();
-        $table = $this->clientRepository->getTable();
-        $existingClient = $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT id FROM $table WHERE redirect_uri = %s",
-                $redirectUri
-            )
-        );
-        
-        if ($existingClient) {
+        // Extract domain from the redirect URI
+        $domain = parse_url($redirectUri, PHP_URL_HOST);
+        if (!$domain) {
             return new WP_Error(
-                'redirect_uri_exists',
-                'A client with this redirect URI already exists',
+                'invalid_redirect_uri',
+                'Could not extract domain from the redirect URI',
+                array('status' => 400)
+            );
+        }
+        
+        // Check if domain already exists using the ClientRepository
+        if ($this->clientRepository->domainExists($domain)) {
+            return new WP_Error(
+                'domain_exists',
+                'A client with this domain already exists',
                 array('status' => 400)
             );
         }
@@ -100,7 +101,8 @@ class Register extends AbstractRepository
             $name = $request->get_param('name');
             $redirectUri = $request->get_param('redirect_uri');
             $grantTypes = ['authorization_code', 'refresh_token'];
-            
+            $domain = parse_url($redirectUri, PHP_URL_HOST);
+
             // Insert the client into the database
             $wpdb = self::getDB();
             $result = $wpdb->insert(
@@ -110,9 +112,11 @@ class Register extends AbstractRepository
                     'name'         => $name,
                     'secret'       => $clientSecret,
                     'redirect_uri' => $redirectUri,
+                    'domain'       => $domain,
                     'grant_types'  => $grantTypes,
                 ),
                 array(
+                    '%s',
                     '%s',
                     '%s',
                     '%s',

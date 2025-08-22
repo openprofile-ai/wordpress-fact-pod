@@ -64,4 +64,25 @@ class ClientRepository extends AbstractRepository implements ClientRepositoryInt
 
         return true;
     }
+    
+    /**
+     * Check if a client with the given domain already exists
+     *
+     * @param string $domain The domain to check
+     * @return bool True if a client with the domain exists, false otherwise
+     */
+    public function domainExists(string $domain): bool
+    {
+        $wpdb = self::getDB();
+        $table = $this->getTable();
+        
+        $existingClient = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT id FROM $table WHERE domain = %s",
+                $domain
+            )
+        );
+        
+        return $existingClient !== null;
+    }
 }
