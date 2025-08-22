@@ -99,7 +99,7 @@ class ClientRepository extends AbstractRepository implements ClientRepositoryInt
                 'secret'       => $clientSecret,
                 'redirect_uri' => $redirectUri,
                 'domain'       => $domain,
-                'grant_types'  => self::GRAND_TYPES,
+                'grant_types'  => implode(' ', self::GRAND_TYPES),
             ),
             array(
                 '%s',
