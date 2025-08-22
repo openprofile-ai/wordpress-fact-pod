@@ -47,11 +47,33 @@ return new class {
         PRIMARY KEY  (scope)
     ) $charsetCollate;";
 
+
+        $sqlAccessTokens = "CREATE TABLE {$prefix}oauth_access_tokens (
+            access_token varchar(100) NOT NULL,
+            client_id varchar(80) NOT NULL,
+            user_id varchar(80) DEFAULT NULL,
+            revoked tinyint(1) DEFAULT 0,
+            expires datetime NOT NULL,
+            scope text DEFAULT NULL,
+            PRIMARY KEY  (access_token)
+    ) $charsetCollate;";
+
         // Create tables
         dbDelta($sqlClients);
         dbDelta($sqlRefreshTokens);
         dbDelta($sqlAuthCodes);
         dbDelta($sqlScopes);
+        dbDelta($sqlAccessTokens);
+
+
+        $wpdb->query("
+            ALTER TABLE {$prefix}oauth_refresh_tokens
+            ADD CONSTRAINT fk_access_token
+            FOREIGN KEY (access_token)
+            REFERENCES {$prefix}oauth_access_tokens(access_token)
+            ON DELETE CASCADE
+    ");
+
 
         $this->addOauthScopes();
     }

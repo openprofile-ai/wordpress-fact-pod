@@ -22,7 +22,7 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
             $table,
             [
                 'refresh_token' => $refreshTokenEntity->getIdentifier(),
-                'access_token'  => null, // no access tokens stored
+                'access_token' => $refreshTokenEntity->getAccessToken()->getIdentifier(),
                 'revoked'       => 0,
                 'expires'       => $refreshTokenEntity->getExpiryDateTime()->format('Y-m-d H:i:s'),
             ],
