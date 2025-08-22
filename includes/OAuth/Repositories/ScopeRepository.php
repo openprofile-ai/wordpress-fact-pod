@@ -6,14 +6,18 @@ use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
 use League\OAuth2\Server\Repositories\ScopeRepositoryInterface;
 use OpenProfile\WordpressFactPod\OAuth\Entities\ScopeEntity;
+use OpenProfile\WordpressFactPod\Utils\AbstractRepository;
 
-class ScopeRepository implements ScopeRepositoryInterface
+class ScopeRepository extends AbstractRepository implements ScopeRepositoryInterface
 {
+    public function getTable(): string
+    {
+        return self::getPrefix() . 'oauth_scopes';
+    }
     public function getScopeEntityByIdentifier(string $identifier): ?ScopeEntityInterface
     {
-        global $wpdb;
-
-        $table = $wpdb->prefix . 'fact_pod_oauth_scopes';
+        $wpdb = self::getDB();
+        $table = $this->getTable();
 
         $scopeRow = $wpdb->get_row(
             $wpdb->prepare("SELECT * FROM $table WHERE scope = %s AND is_active=1", $identifier)
@@ -28,9 +32,8 @@ class ScopeRepository implements ScopeRepositoryInterface
 
     public function validateScopesExist(array $scopes = []): bool
     {
-        global $wpdb;
-
-        $table = $wpdb->prefix . 'fact_pod_oauth_scopes';
+        $wpdb = self::getDB();
+        $table = $this->getTable();
 
         $placeholders = implode(',', array_fill(0, count($scopes), '%s'));
         $query = "SELECT scope FROM $table WHERE scope IN ($placeholders)";

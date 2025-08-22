@@ -1,13 +1,15 @@
 <?php
 require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
+use OpenProfile\WordpressFactPod\Utils\AbstractRepository;
+
 return new class {
     public function up()
     {
-        global $wpdb;
+        $wpdb = AbstractRepository::getDB();
 
         $charsetCollate = $wpdb->get_charset_collate();
-        $prefix = $wpdb->prefix . 'fact_pod_';
+        $prefix = AbstractRepository::getPrefix();
 
         // Table: oauth_clients
         $sqlClients = "CREATE TABLE {$prefix}oauth_clients (
@@ -79,9 +81,8 @@ return new class {
     }
 
     private function addOauthScopes() {
-        global $wpdb;
-
-        $tableName = $wpdb->prefix . 'fact_pod_oauth_scopes';
+        $wpdb = AbstractRepository::getDB();
+        $tableName = AbstractRepository::getPrefix() . 'oauth_scopes';
 
         $categories = get_terms(array(
             'taxonomy'   => 'product_cat',

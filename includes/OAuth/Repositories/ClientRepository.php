@@ -5,14 +5,18 @@ namespace OpenProfile\WordpressFactPod\OAuth\Repositories;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\ClientRepositoryInterface;
 use OpenProfile\WordpressFactPod\OAuth\Entities\ClientEntity;
+use OpenProfile\WordpressFactPod\Utils\AbstractRepository;
 
-class ClientRepository implements ClientRepositoryInterface
+class ClientRepository extends AbstractRepository implements ClientRepositoryInterface
 {
+    public function getTable(): string
+    {
+        return self::getPrefix() . 'oauth_clients';
+    }
     public function getClientEntity(string $clientIdentifier): ?ClientEntityInterface
     {
-        global $wpdb;
-
-        $table = $wpdb->prefix . 'fact_pod_oauth_clients';
+        $wpdb = self::getDB();
+        $table = $this->getTable();
 
         $client = $wpdb->get_row(
             $wpdb->prepare(
@@ -34,9 +38,8 @@ class ClientRepository implements ClientRepositoryInterface
 
     public function validateClient(string $clientIdentifier, ?string $clientSecret, ?string $grantType): bool
     {
-        global $wpdb;
-
-        $table = $wpdb->prefix . 'fact_pod_oauth_clients';
+        $wpdb = self::getDB();
+        $table = $this->getTable();
 
         $client = $wpdb->get_row(
             $wpdb->prepare(

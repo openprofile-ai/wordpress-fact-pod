@@ -7,18 +7,13 @@ use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
 use OpenProfile\WordpressFactPod\OAuth\Entities\AccessTokenEntity;
-use wpdb;
+use OpenProfile\WordpressFactPod\Utils\AbstractRepository;
 
-class AccessTokenRepository implements AccessTokenRepositoryInterface
+class AccessTokenRepository extends AbstractRepository implements AccessTokenRepositoryInterface
 {
-    protected wpdb $db;
-    protected string $table;
-
-    public function __construct()
+    public function getTable(): string
     {
-        global $wpdb;
-        $this->db = $wpdb;
-        $this->table = $wpdb->prefix . 'fact_pod_oauth_access_tokens';
+        return self::getPrefix() . 'oauth_access_tokens';
     }
 
     public function getNewToken(ClientEntityInterface $clientEntity, array $scopes, ?string $userIdentifier = null): AccessTokenEntityInterface
@@ -41,8 +36,8 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
     public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity): void
     {
-        $this->db->insert(
-            $this->table,
+        self::getDB()->insert(
+            $this->getTable(),
             [
                 'access_token' => $accessTokenEntity->getIdentifier(),
                 'client_id'    => $accessTokenEntity->getClient()->getIdentifier(),
@@ -59,8 +54,8 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
     public function revokeAccessToken(string $tokenId): void
     {
-        $this->db->update(
-            $this->table,
+        self::getDB()->update(
+            $this->getTable(),
             ['revoked' => 1],
             ['access_token' => $tokenId],
             ['%d'],
@@ -70,8 +65,11 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
     public function isAccessTokenRevoked(string $tokenId): bool
     {
-        $revoked = $this->db->get_var($this->db->prepare(
-            "SELECT revoked FROM {$this->table} WHERE access_token = %s",
+        $wpdb = self::getDB();
+        $table = $this->getTable();
+        
+        $revoked = $wpdb->get_var($wpdb->prepare(
+            "SELECT revoked FROM {$table} WHERE access_token = %s",
             $tokenId
         ));
 
