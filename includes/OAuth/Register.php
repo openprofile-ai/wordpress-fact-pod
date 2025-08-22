@@ -101,7 +101,7 @@ class Register extends AbstractRepository
             $name = $request->get_param('name');
             $redirectUri = $request->get_param('redirect_uri');
 
-            $this->clientRepository->createClient($clientId, $clientSecret, $name, $redirectUri);
+            $this->clientRepository->createClient($clientId, $name, $clientSecret, $redirectUri);
             
             return new WP_REST_Response(
                 array(
