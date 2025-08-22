@@ -112,6 +112,13 @@ class WordpressFactPod
      */
     private function init_well_known(): void
     {
+        add_filter('redirect_canonical', function ($redirect_url, $requested_url) {
+            if (str_contains($requested_url, '/.well-known/')) {
+                return false; // Prevent redirects for .well-known URLs
+            }
+            return $redirect_url;
+        }, 10, 2);
+
         add_action('init', function () {
             // Add rewrite rules for .well-known files
             add_rewrite_rule(
@@ -119,26 +126,27 @@ class WordpressFactPod
                 'index.php?wpfp_well_known=openprofile',
                 'top'
             );
-            
+
             add_rewrite_rule(
                 '^\.well-known/openprofile-jwks\.json$',
                 'index.php?wpfp_well_known=openprofile-jwks',
                 'top'
             );
-            
+
             if (get_option('wpfp_flush_rewrite')) {
                 flush_rewrite_rules();
+                delete_option('wpfp_flush_rewrite'); // Clean up after flushing
             }
         });
-        
+
         add_filter('query_vars', function ($vars) {
             $vars[] = 'wpfp_well_known';
             return $vars;
         });
-        
+
         add_action('template_redirect', function () {
             $wellKnownType = get_query_var('wpfp_well_known');
-            
+
             if ($wellKnownType) {
                 $optionKey = '';
                 if ($wellKnownType === 'openprofile') {
@@ -146,10 +154,10 @@ class WordpressFactPod
                 } elseif ($wellKnownType === 'openprofile-jwks') {
                     $optionKey = 'wpfp_openprofile_jwks';
                 }
-                
+
                 if (!empty($optionKey)) {
                     $optionValue = get_option($optionKey);
-                    
+
                     if ($optionValue) {
                         header('Content-Type: application/json');
                         echo $optionValue;
