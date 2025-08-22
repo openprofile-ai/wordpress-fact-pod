@@ -5,14 +5,21 @@ namespace OpenProfile\WordpressFactPod\OAuth\Repositories;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\ClientRepositoryInterface;
 use OpenProfile\WordpressFactPod\OAuth\Entities\ClientEntity;
+use OpenProfile\WordpressFactPod\Utils\AbstractRepository;
 
-class ClientRepository implements ClientRepositoryInterface
+class ClientRepository extends AbstractRepository implements ClientRepositoryInterface
 {
+    const array GRAND_TYPES = ['authorization_code', 'refresh_token'];
+
+    public function getTable(): string
+    {
+        return self::getPrefix() . 'oauth_clients';
+    }
+
     public function getClientEntity(string $clientIdentifier): ?ClientEntityInterface
     {
-        global $wpdb;
-
-        $table = $wpdb->prefix . 'fact_pod_oauth_clients';
+        $wpdb = self::getDB();
+        $table = $this->getTable();
 
         $client = $wpdb->get_row(
             $wpdb->prepare(
@@ -34,9 +41,8 @@ class ClientRepository implements ClientRepositoryInterface
 
     public function validateClient(string $clientIdentifier, ?string $clientSecret, ?string $grantType): bool
     {
-        global $wpdb;
-
-        $table = $wpdb->prefix . 'fact_pod_oauth_clients';
+        $wpdb = self::getDB();
+        $table = $this->getTable();
 
         $client = $wpdb->get_row(
             $wpdb->prepare(
@@ -60,5 +66,55 @@ class ClientRepository implements ClientRepositoryInterface
         }
 
         return true;
+    }
+
+    public function domainExists(string $domain): bool
+    {
+        $wpdb = self::getDB();
+        $table = $this->getTable();
+        
+        $existingClient = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT id FROM $table WHERE domain = %s",
+                $domain
+            )
+        );
+        
+        return $existingClient !== null;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function createClient(string $clientId, string $name, string $clientSecret, string $redirectUri): void
+    {
+        $wpdb = self::getDB();
+        $domain = parse_url($redirectUri, PHP_URL_HOST);
+
+        $result = $wpdb->insert(
+            $this->getTable(),
+            array(
+                'id'           => $clientId,
+                'name'         => $name,
+                'secret'       => $clientSecret,
+                'redirect_uri' => $redirectUri,
+                'domain'       => $domain,
+                'grant_types'  => self::GRAND_TYPES,
+            ),
+            array(
+                '%s',
+                '%s',
+                '%s',
+                '%s',
+                '%s',
+                '%s',
+            )
+        );
+
+        if ($result === false) {
+            error_log('Failed to create client: ' . $wpdb->last_error);
+
+            throw new \Exception('Failed to create client.');
+        }
     }
 }

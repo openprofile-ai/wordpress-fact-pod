@@ -5,9 +5,15 @@ namespace OpenProfile\WordpressFactPod\OAuth\Repositories;
 use League\OAuth2\Server\Entities\RefreshTokenEntityInterface;
 use League\OAuth2\Server\Repositories\RefreshTokenRepositoryInterface;
 use OpenProfile\WordpressFactPod\OAuth\Entities\RefreshTokenEntity;
+use OpenProfile\WordpressFactPod\Utils\AbstractRepository;
 
-class RefreshTokenRepository implements RefreshTokenRepositoryInterface
+class RefreshTokenRepository extends AbstractRepository implements RefreshTokenRepositoryInterface
 {
+    public function getTable(): string
+    {
+        return self::getPrefix() . 'oauth_refresh_tokens';
+    }
+    
     public function getNewRefreshToken(): ?RefreshTokenEntityInterface
     {
         return new RefreshTokenEntity();
@@ -15,14 +21,11 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
 
     public function persistNewRefreshToken(RefreshTokenEntityInterface $refreshTokenEntity): void
     {
-        global $wpdb;
-        $table = $wpdb->prefix . 'fact_pod_oauth_refresh_tokens';
-
-        $wpdb->insert(
-            $table,
+        self::getDB()->insert(
+            $this->getTable(),
             [
                 'refresh_token' => $refreshTokenEntity->getIdentifier(),
-                'access_token'  => null, // no access tokens stored
+                'access_token' => $refreshTokenEntity->getAccessToken()->getIdentifier(),
                 'revoked'       => 0,
                 'expires'       => $refreshTokenEntity->getExpiryDateTime()->format('Y-m-d H:i:s'),
             ],
@@ -32,11 +35,8 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
 
     public function revokeRefreshToken(string $tokenId): void
     {
-        global $wpdb;
-        $table = $wpdb->prefix . 'fact_pod_oauth_refresh_tokens';
-
-        $wpdb->update(
-            $table,
+        self::getDB()->update(
+            $this->getTable(),
             ['revoked' => 1],
             ['refresh_token' => $tokenId],
             ['%d'],
@@ -46,8 +46,8 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
 
     public function isRefreshTokenRevoked(string $tokenId): bool
     {
-        global $wpdb;
-        $table = $wpdb->prefix . 'fact_pod_oauth_refresh_tokens';
+        $wpdb = self::getDB();
+        $table = $this->getTable();
 
         $revoked = $wpdb->get_var(
             $wpdb->prepare(

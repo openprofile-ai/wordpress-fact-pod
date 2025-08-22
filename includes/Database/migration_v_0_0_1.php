@@ -1,22 +1,26 @@
 <?php
 require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
+use OpenProfile\WordpressFactPod\Utils\AbstractRepository;
+
 return new class {
     public function up()
     {
-        global $wpdb;
+        $wpdb = AbstractRepository::getDB();
 
         $charsetCollate = $wpdb->get_charset_collate();
-        $prefix = $wpdb->prefix . 'fact_pod_';
+        $prefix = AbstractRepository::getPrefix();
 
         // Table: oauth_clients
         $sqlClients = "CREATE TABLE {$prefix}oauth_clients (
         id varchar(36) NOT NULL,
         name varchar(255) NOT NULL,
         secret varchar(100) DEFAULT NULL,
-        redirect_uri text NOT NULL,
+        redirect_uri varchar(255) NOT NULL,
+        domain varchar(255) NOT NULL,
         grant_types text DEFAULT NULL,
-        PRIMARY KEY  (id)
+        PRIMARY KEY  (id),
+        UNIQUE KEY domain (domain)
     ) $charsetCollate;";
 
         // Table: oauth_refresh_tokens
@@ -47,19 +51,38 @@ return new class {
         PRIMARY KEY  (scope)
     ) $charsetCollate;";
 
+
+        $sqlAccessTokens = "CREATE TABLE {$prefix}oauth_access_tokens (
+            access_token varchar(100) NOT NULL,
+            client_id varchar(80) NOT NULL,
+            user_id varchar(80) DEFAULT NULL,
+            revoked tinyint(1) DEFAULT 0,
+            expires datetime NOT NULL,
+            scope text DEFAULT NULL,
+            PRIMARY KEY  (access_token)
+    ) $charsetCollate;";
+
         // Create tables
         dbDelta($sqlClients);
         dbDelta($sqlRefreshTokens);
         dbDelta($sqlAuthCodes);
         dbDelta($sqlScopes);
+        dbDelta($sqlAccessTokens);
+
+        $wpdb->query("
+            ALTER TABLE {$prefix}oauth_refresh_tokens
+            ADD CONSTRAINT fk_access_token
+            FOREIGN KEY (access_token)
+            REFERENCES {$prefix}oauth_access_tokens(access_token)
+            ON DELETE CASCADE
+    ");
 
         $this->addOauthScopes();
     }
 
     private function addOauthScopes() {
-        global $wpdb;
-
-        $tableName = $wpdb->prefix . 'fact_pod_oauth_scopes';
+        $wpdb = AbstractRepository::getDB();
+        $tableName = AbstractRepository::getPrefix() . 'oauth_scopes';
 
         $categories = get_terms(array(
             'taxonomy'   => 'product_cat',

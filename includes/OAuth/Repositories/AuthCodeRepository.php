@@ -5,9 +5,14 @@ namespace OpenProfile\WordpressFactPod\OAuth\Repositories;
 use League\OAuth2\Server\Entities\AuthCodeEntityInterface;
 use League\OAuth2\Server\Repositories\AuthCodeRepositoryInterface;
 use OpenProfile\WordpressFactPod\OAuth\Entities\AuthCodeEntity;
+use OpenProfile\WordpressFactPod\Utils\AbstractRepository;
 
-class AuthCodeRepository implements AuthCodeRepositoryInterface
+class AuthCodeRepository extends AbstractRepository implements AuthCodeRepositoryInterface
 {
+    public function getTable(): string
+    {
+        return self::getPrefix() . 'oauth_auth_codes';
+    }
     public function getNewAuthCode(): AuthCodeEntityInterface
     {
         return new AuthCodeEntity();
@@ -15,26 +20,23 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
 
     public function persistNewAuthCode(AuthCodeEntityInterface $authCodeEntity): void
     {
-        global $wpdb;
-        $table = $wpdb->prefix . 'fact_pod_oauth_auth_codes';
-
-        $wpdb->insert($table, [
-            'authorization_code' => $authCodeEntity->getIdentifier(),
-            'client_id'          => $authCodeEntity->getClient()->getIdentifier(),
-            'user_id'            => $authCodeEntity->getUserIdentifier(),
-            'redirect_uri'       => $authCodeEntity->getRedirectUri(),
-            'expires'            => $authCodeEntity->getExpiryDateTime()->format('Y-m-d H:i:s'),
-            'scope'              => implode(' ', array_map(fn($s) => $s->getIdentifier(), $authCodeEntity->getScopes())),
-        ]);
+        self::getDB()->insert(
+            $this->getTable(), 
+            [
+                'authorization_code' => $authCodeEntity->getIdentifier(),
+                'client_id'          => $authCodeEntity->getClient()->getIdentifier(),
+                'user_id'            => $authCodeEntity->getUserIdentifier(),
+                'redirect_uri'       => $authCodeEntity->getRedirectUri(),
+                'expires'            => $authCodeEntity->getExpiryDateTime()->format('Y-m-d H:i:s'),
+                'scope'              => implode(' ', array_map(fn($s) => $s->getIdentifier(), $authCodeEntity->getScopes())),
+            ]
+        );
     }
 
     public function revokeAuthCode(string $codeId): void
     {
-        global $wpdb;
-        $table = $wpdb->prefix . 'fact_pod_oauth_auth_codes';
-
-        $wpdb->update(
-            $table,
+        self::getDB()->update(
+            $this->getTable(),
             ['expires' => gmdate('Y-m-d H:i:s', time() - 3600)],
             ['authorization_code' => $codeId]
         );
@@ -42,8 +44,8 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
 
     public function isAuthCodeRevoked(string $codeId): bool
     {
-        global $wpdb;
-        $table = $wpdb->prefix . 'fact_pod_oauth_auth_codes';
+        $wpdb = self::getDB();
+        $table = $this->getTable();
 
         $expires = $wpdb->get_var(
             $wpdb->prepare(

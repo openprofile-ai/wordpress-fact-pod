@@ -6,6 +6,7 @@ use DateInterval;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
+use League\OAuth2\Server\Grant\RefreshTokenGrant;
 use League\OAuth2\Server\RequestTypes\AuthorizationRequestInterface;
 use Nyholm\Psr7\Response;
 use OpenProfile\WordpressFactPod\OAuth\Entities\ScopeEntity;
@@ -22,6 +23,9 @@ use WP_REST_Request;
 
 class Auth
 {
+    private const string ACCESS_TOKEN_TTL = 'PT1H'; // 1 hour
+    private const string REFRESH_TOKEN_TTL = 'P1Y'; // 1 year
+    
     private AuthorizationServer $server;
     private ScopeRepository $scopeRepository;
 
@@ -39,8 +43,6 @@ class Auth
         $authCodeRepository = new AuthCodeRepository();
         $refreshTokenRepository = new RefreshTokenRepository();
 
-
-        // Setup the authorization server
         $this->server = new AuthorizationServer(
             $clientRepository,
             $accessTokenRepository,
@@ -49,18 +51,13 @@ class Auth
             $this->encryptionKey
         );
 
-        $grant = new AuthCodeGrant(
-            $authCodeRepository,
-            $refreshTokenRepository,
-            new DateInterval('PT10M')
-        );
+        $authCodeGrant = new AuthCodeGrant($authCodeRepository, $refreshTokenRepository, new DateInterval(self::ACCESS_TOKEN_TTL));
+        $authCodeGrant->setRefreshTokenTTL(new DateInterval(self::REFRESH_TOKEN_TTL));
+        $this->server->enableGrantType($authCodeGrant, new DateInterval(self::ACCESS_TOKEN_TTL));
 
-        $grant->setRefreshTokenTTL(new DateInterval('P1Y')); // refresh tokens will expire after 1 year
-
-        $this->server->enableGrantType(
-            $grant,
-            new DateInterval('PT1H') // access tokens will expire after 1 hour
-        );
+        $refreshTokenGrant = new RefreshTokenGrant($refreshTokenRepository);
+        $refreshTokenGrant->setRefreshTokenTTL(new DateInterval(self::REFRESH_TOKEN_TTL));
+        $this->server->enableGrantType($refreshTokenGrant, new DateInterval(self::ACCESS_TOKEN_TTL));
     }
 
     public function register_routes(): void
@@ -114,7 +111,7 @@ class Auth
         );
     }
 
-    public function validate_scopes_exist(WP_REST_Request $request)
+    public function validate_scopes_exist(WP_REST_Request $request): true|WP_Error
     {
         $scopes = $request->get_param('scopes');
 
