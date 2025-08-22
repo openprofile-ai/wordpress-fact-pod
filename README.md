@@ -15,6 +15,44 @@ openssl rsa -in private.key -pubout -outform PEM -out public.key
 INSERT INTO `openprofile`.`wp_fact_pod_oauth_clients` (`id`, `name`, `secret`, `redirect_uri`, `grant_types`) VALUES ('40b46cf8-e2eb-491a-8e2a-6e38d164c377', 'Gateway', '$2y$10$iJ71798kw9EbYI/rZ2UzAeM7YUHSfIQgrNi.Q7HpUw/1btTpVQxoK', 'https://gateway.openprofile.ai/oauth/callback', 'authorization_code refresh_token');
 ```
 
+## OAuth 2.0 Client Registration
+
+To register a new OAuth client, make a POST request to the registration endpoint:
+
+```
+POST http://docker.vm/wp-json/openprofile/oauth/register
+```
+
+### Registration Parameters
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `name` | Yes | A descriptive name for the client application |
+| `redirect_uri` | Yes | The URI to redirect to after authorization is complete (must be a valid URL) |
+
+### Example Registration Request
+
+```
+POST http://docker.vm/wp-json/openprofile/oauth/register
+Content-Type: application/x-www-form-urlencoded
+
+name=My%20Application&redirect_uri=https://example.com/callback&grant_types=authorization_code%20refresh_token
+```
+
+### Example Response
+
+```json
+{
+  "client_id": "550e8400-e29b-41d4-a716-446655440000",
+  "client_secret": "random_generated_secret_that_you_must_store",
+  "name": "My Application",
+  "redirect_uri": "https://example.com/callback",
+  "grant_types": "authorization_code refresh_token"
+}
+```
+
+> **Important**: The `client_secret` is only returned once during registration. Make sure to store it securely as it cannot be retrieved later.
+
 ## OAuth 2.0 Authorization
 
 ### Generating the Authorization Link

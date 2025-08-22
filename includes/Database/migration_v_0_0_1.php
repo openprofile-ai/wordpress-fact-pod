@@ -16,9 +16,10 @@ return new class {
         id varchar(36) NOT NULL,
         name varchar(255) NOT NULL,
         secret varchar(100) DEFAULT NULL,
-        redirect_uri text NOT NULL,
+        redirect_uri varchar(255) NOT NULL,
         grant_types text DEFAULT NULL,
-        PRIMARY KEY  (id)
+        PRIMARY KEY  (id),
+        UNIQUE KEY redirect_uri (redirect_uri)
     ) $charsetCollate;";
 
         // Table: oauth_refresh_tokens

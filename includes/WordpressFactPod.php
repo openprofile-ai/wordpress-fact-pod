@@ -3,6 +3,7 @@
 namespace OpenProfile\WordpressFactPod;
 
 use OpenProfile\WordpressFactPod\OAuth\Auth;
+use OpenProfile\WordpressFactPod\OAuth\Register;
 use OpenProfile\WordpressFactPod\Utils\Session;
 
 /**
@@ -152,6 +153,8 @@ class WordpressFactPod
             } else {
                 error_log('[FactPod] Missing private or public key at init.');
             }
+
+            new Register();
         });
 
         add_action('wp_login', function () {

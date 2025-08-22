@@ -111,7 +111,7 @@ class Auth
         );
     }
 
-    public function validate_scopes_exist(WP_REST_Request $request)
+    public function validate_scopes_exist(WP_REST_Request $request): true|WP_Error
     {
         $scopes = $request->get_param('scopes');
 
