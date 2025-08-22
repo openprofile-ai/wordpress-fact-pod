@@ -77,6 +77,9 @@ class WordpressFactPod
 
         // Initialize OAuth
         $this->init_oauth();
+        
+        // Initialize well-known endpoints
+        $this->init_well_known();
 
         // Load user options if user is logged in
         $this->add_user_options();
@@ -96,11 +99,63 @@ class WordpressFactPod
     {
         require_once $this->pluginPath . 'install.php';
 
-        wp_fact_pod_install(self::VERSION);
+        wp_fact_pod_install_database(self::VERSION);
         wp_fact_pod_generate_keys();
+        wp_fact_pod_publish_well_known_files();
 
         update_option('wpfp_flush_rewrite', true);
         flush_rewrite_rules();
+    }
+
+    /**
+     * Initialize well-known endpoints
+     */
+    private function init_well_known(): void
+    {
+        add_action('init', function () {
+            // Add rewrite rules for .well-known files
+            add_rewrite_rule(
+                '^\.well-known/openprofile\.json$',
+                'index.php?wpfp_well_known=openprofile',
+                'top'
+            );
+            
+            add_rewrite_rule(
+                '^\.well-known/openprofile-jwks\.json$',
+                'index.php?wpfp_well_known=openprofile-jwks',
+                'top'
+            );
+            
+            if (get_option('wpfp_flush_rewrite')) {
+                flush_rewrite_rules();
+            }
+        });
+        
+        add_filter('query_vars', function ($vars) {
+            $vars[] = 'wpfp_well_known';
+            return $vars;
+        });
+        
+        add_action('template_redirect', function () {
+            $wellKnownType = get_query_var('wpfp_well_known');
+            
+            if ($wellKnownType) {
+                $uploadDir = wp_upload_dir();
+                $filePath = '';
+                
+                if ($wellKnownType === 'openprofile') {
+                    $filePath = $uploadDir['basedir'] . '/openprofile/well-known/openprofile.json';
+                } elseif ($wellKnownType === 'openprofile-jwks') {
+                    $filePath = $uploadDir['basedir'] . '/openprofile/well-known/openprofile-jwks.json';
+                }
+                
+                if (!empty($filePath) && file_exists($filePath)) {
+                    header('Content-Type: application/json');
+                    readfile($filePath);
+                    exit;
+                }
+            }
+        });
     }
 
     /**

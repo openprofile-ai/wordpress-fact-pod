@@ -6,12 +6,6 @@ use OpenProfile\WordpressFactPod\OAuth\Repositories\ScopeRepository;
 
 class WellKnown
 {
-    /**
-     * Generate a JWK Set from a public key
-     *
-     * @param string $publicKeyPath Path to the public key file
-     * @return array The JWK Set
-     */
     public static function generateJwks(string $publicKeyPath): array
     {
         // Read the public key
@@ -51,12 +45,6 @@ class WellKnown
         ];
     }
 
-    /**
-     * Generate the OpenProfile discovery document
-     *
-     * @param string $baseUrl The base URL of the WordPress site
-     * @return array The discovery document
-     */
     public static function generateOpenProfileDiscovery(string $baseUrl): array
     {
         // Ensure the base URL doesn't end with a slash

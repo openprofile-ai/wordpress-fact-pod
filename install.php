@@ -4,7 +4,7 @@ defined('ABSPATH') || exit;
 
 use OpenProfile\WordpressFactPod\Utils\WellKnown;
 
-function wp_fact_pod_install(string $version) {
+function wp_fact_pod_install_database(string $version):void {
     $migrations = [
         '0.0.1' => ['migration_v_0_0_1.php'],
 
@@ -20,12 +20,9 @@ function wp_fact_pod_install(string $version) {
             $migration->up();
         }
     }
-    
-    // Generate and publish well-known files
-    wp_fact_pod_publish_well_known_files();
 }
 
-function wp_fact_pod_generate_keys() {
+function wp_fact_pod_generate_keys():void {
     $keyDir = WORDPRESS_FACT_POD_PATH;
     $privateKeyFile = $keyDir . 'private.key';
     $publicKeyFile  = $keyDir . 'public.key';
@@ -50,11 +47,14 @@ function wp_fact_pod_generate_keys() {
     }
 }
 
-function wp_fact_pod_publish_well_known_files() {
+function wp_fact_pod_publish_well_known_files():void {
     $siteUrl = get_site_url();
     
-    // Create .well-known directory if it doesn't exist
-    $wellKnownDir = ABSPATH . '.well-known';
+    // Get WordPress uploads directory
+    $uploadDir = wp_upload_dir();
+    
+    // Create openprofile-well-known directory in uploads if it doesn't exist
+    $wellKnownDir = $uploadDir['basedir'] . '/openprofile/well-known';
     if (!file_exists($wellKnownDir)) {
         wp_mkdir_p($wellKnownDir);
     }
