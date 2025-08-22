@@ -9,6 +9,59 @@ openssl genrsa -out ./private.key 4096
 openssl rsa -in private.key -pubout -outform PEM -out public.key
 ```
 
+## .well-known Files
+
+The plugin creates two important .well-known files that are essential for OpenProfile discovery and authentication:
+
+### 1. openprofile.json
+
+This file serves as the OpenProfile discovery document, allowing clients to automatically discover the OAuth endpoints and capabilities of your OpenProfile implementation. It is accessible at:
+
+```
+https://your-domain.com/.well-known/openprofile.json
+```
+
+#### Important Fields in openprofile.json
+
+| Field | Description |
+|-------|-------------|
+| `issuer` | The base URL of your WordPress site, used to identify the token issuer |
+| `authorization_endpoint` | The URL where users are redirected to authorize client applications |
+| `token_endpoint` | The URL where client applications can exchange authorization codes for access tokens |
+| `registration_endpoint` | The URL where new client applications can register |
+| `jwks_uri` | The URL to the JSON Web Key Set (JWKS) containing the public keys used to verify tokens |
+| `response_types_supported` | The OAuth 2.0 response types supported by this server (e.g., "code") |
+| `grant_types_supported` | The OAuth 2.0 grant types supported by this server (e.g., "authorization_code", "refresh_token") |
+| `token_endpoint_auth_methods_supported` | Authentication methods supported at the token endpoint |
+| `scopes_supported` | List of OAuth scopes supported by this server |
+
+### 2. openprofile-jwks.json
+
+This file contains the JSON Web Key Set (JWKS) with the public key information used to verify the signatures of JSON Web Tokens (JWTs) issued by your server. It is accessible at:
+
+```
+https://your-domain.com/.well-known/openprofile-jwks.json
+```
+
+#### Important Fields in openprofile-jwks.json
+
+| Field | Description |
+|-------|-------------|
+| `keys` | Array of JSON Web Keys (JWK) |
+| `kty` | Key type (e.g., "RSA") |
+| `use` | Public key use (e.g., "sig" for signature) |
+| `kid` | Key ID used to match a specific key |
+| `alg` | Algorithm used with this key (e.g., "RS256") |
+| `n` | RSA modulus value (base64url-encoded) |
+| `e` | RSA exponent value (base64url-encoded) |
+
+### How Clients Use These Files
+
+1. A client discovers your OpenProfile implementation by accessing the `.well-known/openprofile.json` endpoint
+2. The client reads the endpoints from this file to know where to send authorization and token requests
+3. When verifying tokens, the client uses the `jwks_uri` to fetch the public keys from `.well-known/openprofile-jwks.json`
+4. The client can then use these keys to verify the signature of tokens issued by your server
+
 ## Add a test client with secret=SECRET
 
 ```sql
