@@ -111,7 +111,31 @@ if (!is_admin()) {
 }
 
 function fact_pod_enqueue_styles() {
-    wp_enqueue_style('fact-pod-styles', plugin_dir_url(__FILE__) . 'assets/styles/fact-pod.css');
+        wp_enqueue_style('fact-pod-styles', plugin_dir_url(__FILE__) . 'assets/styles/fact-pod.css');
 }
 
 add_action('wp_enqueue_scripts', 'fact_pod_enqueue_styles');
+
+function factpod_is_oauth_route(): bool {
+    $path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+    if (!is_string($path)) return false;
+    $path = rtrim($path, '/') . '/';
+    return $path === '/openprofile/oauth/login/' || $path === '/openprofile/oauth/scopes/';
+}
+
+add_action('wp_enqueue_scripts', function () {
+    if (!factpod_is_oauth_route()) return;
+
+    wp_enqueue_script(
+        'factpod-shadow',
+        plugin_dir_url(__FILE__) . 'assets/js/factpod-shadow.js',
+        array(),
+        '1.0.0',
+        true
+    );
+
+    wp_localize_script('factpod-shadow', 'FACTPOD', array(
+        'cssUrl' => plugins_url('assets/styles/fact-pod.css', __FILE__),
+        'hosts'  => array('#factpod-root', '[data-factpod]'),
+    ));
+}, 1000);

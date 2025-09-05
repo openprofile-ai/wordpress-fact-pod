@@ -22,20 +22,21 @@ if (is_null($authRequest) || is_null($user)) {
 include WORDPRESS_FACT_POD_PATH . 'templates/header-factpod.php';
 ?>
 
-
-<div class="fact-pod-form box">
-    <div class="logo">
+<div id="factpod-root" data-factpod="scopes">
+    <div class="fact-pod-form">
+        <div class="logo">
+        </div>
+        <h2>Sign up to <?php echo $authRequest->getClient()->getName() ?></h2>
+        <form action="/wp-json/openprofile/oauth/approve" class="fact-pod-form" method="post" id="oauth-scopes-form">
+            <?php foreach ($authRequest->getScopes() as $scope) { ?>
+                <label><input type="checkbox" value="<?php echo $scope->getIdentifier() ?>" name="scopes[]" /> <?php echo $scope->getDescription() ?></label>
+            <?php } ?>
+            <p>
+                <button type="submit" class="button">Approve</button>
+                <a href="/openprofile/oauth/login/" class="button">Cancel</a>
+            </p>
+        </form>
     </div>
-    <h2>Sign up to <?php echo $authRequest->getClient()->getName() ?></h2>
-    <form action="/wp-json/openprofile/oauth/approve" class="fact-pod-form" method="post" id="oauth-scopes-form">
-        <?php foreach ($authRequest->getScopes() as $scope) { ?>
-            <label><input type="checkbox" value="<?php echo $scope->getIdentifier() ?>" name="scopes[]" /> <?php echo $scope->getDescription() ?></label>
-        <?php } ?>
-        <p>
-            <button type="submit" class="button">Approve</button>
-            <a href="/openprofile/oauth/login/" class="button">Cancel</a>
-        </p>
-    </form>
 </div>
 
 <?php

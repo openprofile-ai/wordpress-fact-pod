@@ -1,109 +1,144 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
-
-body {
-    margin: 0;
-    padding: 0;
-    background-size: cover;
-    font-family: 'Open Sans', sans-serif;
-}
-
 .box {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     width: 30rem;
+    max-width: 92vw;
     padding: 3.5rem;
     box-sizing: border-box;
     border: 1px solid #dadce0;
-    -webkit-border-radius: 8px;
     border-radius: 8px;
+    background: #fff;
 }
 
 .box h2 {
-    margin: 0px 0 -0.125rem;
-    padding: 0;
+    margin: 0 0 0.25rem;
     text-align: center;
     color: #202124;
     font-size: 24px;
-    font-weight: 400;
+    font-weight: 500;
 }
-
-.box .logo 
-{
+.box .logo {
     display: flex;
     flex-direction: row;
     justify-content: center;
     margin-bottom: 16px;
-
 }
-
 .box p {
     font-size: 16px;
     font-weight: 400;
-    letter-spacing: 1px;
+    letter-spacing: 0.2px;
     line-height: 1.5;
     margin-bottom: 24px;
     text-align: center;
+    color: #5f6368;
 }
 
 .box .form-row {
     position: relative;
+    margin-bottom: 16px;
 }
 
-.box .form-row input {
-    width: 93%;
-    padding: 1.3rem 10px;
-    font-size: 1rem;
-   letter-spacing: 0.062rem;
-   margin-bottom: 1.875rem;
-   border: 1px solid #ccc;
-   background: transparent;
-   border-radius: 4px;
+.box .form-row input[type="text"],
+.box .form-row input[type="email"],
+.box .form-row input[type="password"],
+.box .form-row textarea {
+    width: 100%;
+    padding: 1.0rem 12px;
+    font-size: 14px;
+    letter-spacing: 0.02rem;
+    border: 1px solid #dadce0;
+    background: #fff;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+    box-sizing: border-box;
+}
+
+.box .form-row input:focus,
+.box .form-row textarea:focus {
+    border: 2px solid #1a73e8;
+    box-shadow: 0 0 0 3px rgba(26,115,232,.15);
 }
 
 .box .form-row label {
     position: absolute;
-    top: 0;
-    left: 10px;
-    padding: 0.625rem 0;
-    font-size: 1rem;
+    top: 12px;
+    left: 12px;
+    padding: 0 4px;
+    font-size: 14px;
     color: gray;
-    pointer-events: none;
-    transition: 0.5s;
+    background: #fff;
+    line-height: 1;
+    transition: transform .15s ease, color .15s ease, font-size .15s ease, top .15s ease;
+}
+.box .form-row label.woocommerce-form__label.woocommerce-form__label-for-checkbox.woocommerce-form-login__rememberme{
+    position: static;
 }
 
-.box .form-row input:focus ~ label,
-.box .form-row input:valid ~ label,
-.box .form-row input:not([value=""]) ~ label {
-    top: -1.125rem;
-    left: 10px;
+.box .form-row input:focus + label,
+.box .form-row input:not(:placeholder-shown) + label,
+.box .form-row textarea:focus + label,
+.box .form-row textarea:not(:placeholder-shown) + label {
+    transform: translateY(-18px);
     color: #1a73e8;
-    font-size: 0.75rem;
-    background-color: #fff;
-    height: 10px;
-    padding-left: 5px;
-    padding-right: 5px;
+    font-size: 12px;
+    top: 6px;
 }
 
-.box .form-row input:focus {
-    outline: none;
-    border: 2px solid #1a73e8;
-}
-
-.box input[type="submit"] {
+.box input[type="submit"],
+.box .button,
+.box button {
     border: none;
     outline: none;
     color: #fff;
     background-color: #1a73e8;
     padding: 0.625rem 1.25rem;
     cursor: pointer;
-    border-radius: 0.312rem;
-    font-size: 1rem;
-    float: right;
-  }
-
-  .box input[type="submit"]:hover {
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 1px 1px rgba(66,133,244,.40), 0 1px 3px 1px rgba(66,133,244,.25);
+    transition: background .15s ease, transform .02s ease;
+}
+.box input[type="submit"]:hover,
+.box .button:hover,
+.box button:hover {
     background-color: #287ae6;
-    box-shadow: 0 1px 1px 0 rgba(66,133,244,0.45), 0 1px 3px 1px rgba(66,133,244,0.3);
-  }
+}
+
+.box .actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+#oauth-scopes-form .scope {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #3c4043;
+}
+#oauth-scopes-form .scope input[type="checkbox"] {
+    margin-top: 2px;
+}
+#oauth-scopes-form label {
+    display: block;
+    margin-bottom: 15px;
+}
+
+#oauth-scopes-form .button{
+    width: 230px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+}
+
+.woocommerce form .form-row input.input-text,
+.woocommerce form .form-row textarea {
+    width: 100% !important;
+}

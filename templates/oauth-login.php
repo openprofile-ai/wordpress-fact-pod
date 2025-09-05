@@ -26,13 +26,14 @@ if (! is_null($user) && $user->ID > 0) {
 
 include WORDPRESS_FACT_POD_PATH . 'templates/header-factpod.php';
 ?>
-
-<div class="fact-pod-form box">
-    <div class="logo">
+<div id="factpod-root" data-factpod="login">
+    <div class="fact-pod-form">
+        <div class="logo">
+        </div>
+        <h2>Sign up to <?php echo $authRequest->getClient()->getName() ?></h2>
+        <p>Use your <?php echo get_option('blogname'); ?> account</p>
+        <?php woocommerce_login_form(); ?>
     </div>
-    <h2>Sign up to <?php echo $authRequest->getClient()->getName() ?></h2>
-    <p>Use your <?php echo get_option('blogname'); ?> account</p>
-    <?php woocommerce_login_form(); ?>
 </div>
 
 <?php
