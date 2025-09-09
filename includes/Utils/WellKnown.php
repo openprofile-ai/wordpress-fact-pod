@@ -3,6 +3,7 @@
 namespace OpenProfile\WordpressFactPod\Utils;
 
 use OpenProfile\WordpressFactPod\OAuth\Repositories\ScopeRepository;
+use OpenProfile\WordpressFactPod\Utils\WooCommerce;
 
 class WellKnown
 {
@@ -49,6 +50,7 @@ class WellKnown
     {
         // Ensure the base URL doesn't end with a slash
         $baseUrl = rtrim($baseUrl, '/');
+        $categories = WooCommerce::getTopLevelCategories();
 
         return [
             'issuer' => $baseUrl,
@@ -60,6 +62,7 @@ class WellKnown
             'grant_types_supported' => ['authorization_code', 'refresh_token'],
             'token_endpoint_auth_methods_supported' => ['client_secret_basic', 'client_secret_post'],
             'scopes_supported' => (new ScopeRepository())->getSupportedScopes(),
+            'categories' => $categories,
         ];
     }
 }
