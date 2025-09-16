@@ -2,6 +2,7 @@
 require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
 use OpenProfile\WordpressFactPod\Utils\AbstractRepository;
+use OpenProfile\WordpressFactPod\Utils\WooCommerce;
 
 return new class {
     public function up()
@@ -83,34 +84,16 @@ return new class {
     private function addOauthScopes() {
         $wpdb = AbstractRepository::getDB();
         $tableName = AbstractRepository::getPrefix() . 'oauth_scopes';
-
-        $categories = get_terms(array(
-            'taxonomy'   => 'product_cat',
-            'hide_empty' => false,
-            'parent'     => 0,
-        ));
+        $categories = WooCommerce::getTopLevelCategories();
 
         foreach ($categories as $category) {
-            $scope = 'facts:category-' . $category->term_id;
+            $scope = 'facts:category-' . $category['id'];
 
-            // Check if scope already exists
-            $exists = $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM $tableName WHERE scope = %s",
-                $scope
+            $wpdb->query($wpdb->prepare(
+                "REPLACE INTO $tableName (scope, description) VALUES (%s, %s)",
+                $scope,
+                sprintf('Purchases in the %s category', $category['name'])
             ));
-
-            if (!$exists) {
-                $wpdb->insert(
-                    $tableName,
-                    array(
-                        'scope' => $scope,
-                        'description' => sprintf('Purchases in the %s category', $category->name),
-                    ),
-                    array(
-                        '%s',
-                    )
-                );
-            }
         }
 
         // Insert additional scopes
@@ -122,24 +105,11 @@ return new class {
         );
 
         foreach ($additionalScopes as $scopeData) {
-            $exists = $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM $tableName WHERE scope = %s",
-                $scopeData['scope']
+            $wpdb->query($wpdb->prepare(
+                "REPLACE INTO $tableName (scope, description) VALUES (%s, %s)",
+                $scopeData['scope'],
+                $scopeData['description']
             ));
-
-            if (!$exists) {
-                $wpdb->insert(
-                    $tableName,
-                    array(
-                        'scope' => $scopeData['scope'],
-                        'description' => $scopeData['description'],
-                    ),
-                    array(
-                        '%s',
-                        '%s',
-                    )
-                );
-            }
         }
     }
 };

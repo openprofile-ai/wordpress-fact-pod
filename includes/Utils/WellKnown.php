@@ -3,6 +3,7 @@
 namespace OpenProfile\WordpressFactPod\Utils;
 
 use OpenProfile\WordpressFactPod\OAuth\Repositories\ScopeRepository;
+use OpenProfile\WordpressFactPod\WordpressFactPod;
 
 class WellKnown
 {
@@ -49,8 +50,37 @@ class WellKnown
     {
         // Ensure the base URL doesn't end with a slash
         $baseUrl = rtrim($baseUrl, '/');
+        $categories = WooCommerce::getTopLevelCategories();
+        $shopUrl = WooCommerce::getShopUrl($baseUrl);
+        $catalogItems = [];
+
+        // Map categories to OfferCatalog items
+        foreach ($categories as $cat) {
+            $catalogItems[] = [
+                '@type' => 'OfferCatalog',
+                'name' => $cat['name'] ?? '',
+                'url' => $cat['url'] ?? '',
+                'description' => $cat['description'] ?? '',
+            ];
+        }
 
         return [
+            'openprofile' => [
+                'version' => WordpressFactPod::VERSION,
+            ],
+            'factpod' => [
+                '@context' => 'https://schema.org',
+                '@type'    => 'WebSite',
+                'name'     => get_bloginfo('name'),
+                'description'     => get_bloginfo('description'),
+                'url'      => $baseUrl,
+                'hasPart' => [
+                    '@type' => 'OfferCatalog',
+                    'name'  => 'Product Categories',
+                    'url'   => $shopUrl,
+                    'itemListElement' => $catalogItems,
+                ]
+            ],
             'issuer' => $baseUrl,
             'authorization_endpoint' => $baseUrl . '/wp-json/openprofile/oauth/authorize',
             'token_endpoint' => $baseUrl . '/wp-json/openprofile/oauth/access_token',
