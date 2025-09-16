@@ -14,7 +14,7 @@ class WordpressFactPod
     /**
      * Plugin version
      */
-    const VERSION = '0.0.1';
+    const string VERSION = '0.0.1';
 
     /**
      * Plugin path

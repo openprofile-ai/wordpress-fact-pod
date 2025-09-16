@@ -23,17 +23,17 @@ https://your-domain.com/.well-known/openprofile.json
 
 #### Important Fields in openprofile.json
 
-| Field | Description |
-|-------|-------------|
-| `issuer` | The base URL of your WordPress site, used to identify the token issuer |
-| `authorization_endpoint` | The URL where users are redirected to authorize client applications |
-| `token_endpoint` | The URL where client applications can exchange authorization codes for access tokens |
-| `registration_endpoint` | The URL where new client applications can register |
-| `jwks_uri` | The URL to the JSON Web Key Set (JWKS) containing the public keys used to verify tokens |
-| `response_types_supported` | The OAuth 2.0 response types supported by this server (e.g., "code") |
-| `grant_types_supported` | The OAuth 2.0 grant types supported by this server (e.g., "authorization_code", "refresh_token") |
-| `token_endpoint_auth_methods_supported` | Authentication methods supported at the token endpoint |
-| `scopes_supported` | List of OAuth scopes supported by this server |
+| Field                                   | Description                                                                                      |
+|-----------------------------------------|--------------------------------------------------------------------------------------------------|
+| `issuer`                                | The base URL of your WordPress site, used to identify the token issuer                           |
+| `authorization_endpoint`                | The URL where users are redirected to authorize client applications                              |
+| `token_endpoint`                        | The URL where client applications can exchange authorization codes for access tokens             |
+| `registration_endpoint`                 | The URL where new client applications can register                                               |
+| `jwks_uri`                              | The URL to the JSON Web Key Set (JWKS) containing the public keys used to verify tokens          |
+| `response_types_supported`              | The OAuth 2.0 response types supported by this server (e.g., "code")                             |
+| `grant_types_supported`                 | The OAuth 2.0 grant types supported by this server (e.g., "authorization_code", "refresh_token") |
+| `token_endpoint_auth_methods_supported` | Authentication methods supported at the token endpoint                                           |
+| `scopes_supported`                      | List of OAuth scopes supported by this server                                                    |
 
 ### 2. openprofile-jwks.json
 
@@ -45,15 +45,15 @@ https://your-domain.com/.well-known/openprofile-jwks.json
 
 #### Important Fields in openprofile-jwks.json
 
-| Field | Description |
-|-------|-------------|
-| `keys` | Array of JSON Web Keys (JWK) |
-| `kty` | Key type (e.g., "RSA") |
-| `use` | Public key use (e.g., "sig" for signature) |
-| `kid` | Key ID used to match a specific key |
-| `alg` | Algorithm used with this key (e.g., "RS256") |
-| `n` | RSA modulus value (base64url-encoded) |
-| `e` | RSA exponent value (base64url-encoded) |
+| Field  | Description                                  |
+|--------|----------------------------------------------|
+| `keys` | Array of JSON Web Keys (JWK)                 |
+| `kty`  | Key type (e.g., "RSA")                       |
+| `use`  | Public key use (e.g., "sig" for signature)   |
+| `kid`  | Key ID used to match a specific key          |
+| `alg`  | Algorithm used with this key (e.g., "RS256") |
+| `n`    | RSA modulus value (base64url-encoded)        |
+| `e`    | RSA exponent value (base64url-encoded)       |
 
 ### How Clients Use These Files
 
@@ -78,10 +78,10 @@ POST http://docker.vm/wp-json/openprofile/oauth/register
 
 ### Registration Parameters
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `name` | Yes | A descriptive name for the client application |
-| `redirect_uri` | Yes | The URI to redirect to after authorization is complete (must be a valid URL) |
+| Parameter      | Required | Description                                                                  |
+|----------------|----------|------------------------------------------------------------------------------|
+| `name`         | Yes      | A descriptive name for the client application                                |
+| `redirect_uri` | Yes      | The URI to redirect to after authorization is complete (must be a valid URL) |
 
 ### Example Registration Request
 
@@ -118,13 +118,13 @@ http://docker.vm/wp-json/openprofile/oauth/authorize?response_type=code&client_i
 
 #### Authorization Parameters
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `response_type` | Yes | Must be set to `code` for the authorization code flow |
-| `client_id` | Yes | The client identifier issued to the client during registration |
-| `redirect_uri` | Yes | The URI to redirect to after authorization is complete (must match the registered URI) |
-| `scope` | Yes | Space-separated list of scopes the client is requesting access to |
-| `state` | Recommended | An opaque value used by the client to maintain state between the request and callback |
+| Parameter       | Required    | Description                                                                            |
+|-----------------|-------------|----------------------------------------------------------------------------------------|
+| `response_type` | Yes         | Must be set to `code` for the authorization code flow                                  |
+| `client_id`     | Yes         | The client identifier issued to the client during registration                         |
+| `redirect_uri`  | Yes         | The URI to redirect to after authorization is complete (must match the registered URI) |
+| `scope`         | Yes         | Space-separated list of scopes the client is requesting access to                      |
+| `state`         | Recommended | An opaque value used by the client to maintain state between the request and callback  |
 
 ### Requesting an Access Token
 
@@ -136,13 +136,13 @@ POST http://docker.vm/wp-json/openprofile/oauth/access_token
 
 #### Token Request Parameters
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `grant_type` | Yes | Must be set to `authorization_code` |
-| `client_id` | Yes | The client identifier issued to the client during registration |
-| `client_secret` | Yes | The client secret issued to the client during registration |
-| `redirect_uri` | Yes | Must be identical to the redirect URI provided in the authorization request |
-| `code` | Yes | The authorization code received from the authorization server |
+| Parameter       | Required | Description                                                                 |
+|-----------------|----------|-----------------------------------------------------------------------------|
+| `grant_type`    | Yes      | Must be set to `authorization_code`                                         |
+| `client_id`     | Yes      | The client identifier issued to the client during registration              |
+| `client_secret` | Yes      | The client secret issued to the client during registration                  |
+| `redirect_uri`  | Yes      | Must be identical to the redirect URI provided in the authorization request |
+| `code`          | Yes      | The authorization code received from the authorization server               |
 
 #### Example Token Request
 
@@ -174,13 +174,13 @@ POST http://docker.vm/wp-json/openprofile/oauth/access_token
 
 #### Refresh Token Request Parameters
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `grant_type` | Yes | Must be set to `refresh_token` |
-| `refresh_token` | Yes | The refresh token previously issued to the client |
-| `client_id` | Yes | The client identifier issued to the client during registration |
-| `client_secret` | Yes | The client secret issued to the client during registration |
-| `scope` | No | Space-separated list of scopes (must be equal or a subset of the original scopes) |
+| Parameter       | Required | Description                                                                       |
+|-----------------|----------|-----------------------------------------------------------------------------------|
+| `grant_type`    | Yes      | Must be set to `refresh_token`                                                    |
+| `refresh_token` | Yes      | The refresh token previously issued to the client                                 |
+| `client_id`     | Yes      | The client identifier issued to the client during registration                    |
+| `client_secret` | Yes      | The client secret issued to the client during registration                        |
+| `scope`         | No       | Space-separated list of scopes (must be equal or a subset of the original scopes) |
 
 #### Example Refresh Token Request
 

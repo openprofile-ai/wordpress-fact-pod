@@ -3,7 +3,7 @@
 namespace OpenProfile\WordpressFactPod\Utils;
 
 use OpenProfile\WordpressFactPod\OAuth\Repositories\ScopeRepository;
-use OpenProfile\WordpressFactPod\Utils\WooCommerce;
+use OpenProfile\WordpressFactPod\WordpressFactPod;
 
 class WellKnown
 {
@@ -51,8 +51,36 @@ class WellKnown
         // Ensure the base URL doesn't end with a slash
         $baseUrl = rtrim($baseUrl, '/');
         $categories = WooCommerce::getTopLevelCategories();
+        $shopUrl = WooCommerce::getShopUrl($baseUrl);
+        $catalogItems = [];
+
+        // Map categories to OfferCatalog items
+        foreach ($categories as $cat) {
+            $catalogItems[] = [
+                '@type' => 'OfferCatalog',
+                'name' => $cat['name'] ?? '',
+                'url' => $cat['url'] ?? '',
+                'description' => $cat['description'] ?? '',
+            ];
+        }
 
         return [
+            'openprofile' => [
+                'version' => WordpressFactPod::VERSION,
+            ],
+            'factpod' => [
+                '@context' => 'https://schema.org',
+                '@type'    => 'WebSite',
+                'name'     => get_bloginfo('name'),
+                'description'     => get_bloginfo('description'),
+                'url'      => $baseUrl,
+                'hasPart' => [
+                    '@type' => 'OfferCatalog',
+                    'name'  => 'Product Categories',
+                    'url'   => $shopUrl,
+                    'itemListElement' => $catalogItems,
+                ]
+            ],
             'issuer' => $baseUrl,
             'authorization_endpoint' => $baseUrl . '/wp-json/openprofile/oauth/authorize',
             'token_endpoint' => $baseUrl . '/wp-json/openprofile/oauth/access_token',
@@ -62,7 +90,6 @@ class WellKnown
             'grant_types_supported' => ['authorization_code', 'refresh_token'],
             'token_endpoint_auth_methods_supported' => ['client_secret_basic', 'client_secret_post'],
             'scopes_supported' => (new ScopeRepository())->getSupportedScopes(),
-            'categories' => $categories,
         ];
     }
 }
