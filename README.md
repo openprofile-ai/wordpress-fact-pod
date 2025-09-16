@@ -34,6 +34,9 @@ https://your-domain.com/.well-known/openprofile.json
 | `grant_types_supported`                 | The OAuth 2.0 grant types supported by this server (e.g., "authorization_code", "refresh_token") |
 | `token_endpoint_auth_methods_supported` | Authentication methods supported at the token endpoint                                           |
 | `scopes_supported`                      | List of OAuth scopes supported by this server                                                    |
+| `openprofile`                           | Contains OpenProfile artifacts like version                                                      |
+| `factpod`                               | Contains Schema.ord JSON-LD formatted information about site and available categories            |
+
 
 ### 2. openprofile-jwks.json
 
