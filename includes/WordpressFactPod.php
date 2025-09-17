@@ -5,6 +5,7 @@ namespace OpenProfile\WordpressFactPod;
 use OpenProfile\WordpressFactPod\OAuth\Auth;
 use OpenProfile\WordpressFactPod\OAuth\Register;
 use OpenProfile\WordpressFactPod\Utils\Session;
+use OpenProfile\WordpressFactPod\Facts\Api as FactsApi;
 
 /**
  * Main plugin class that initializes all components
@@ -15,35 +16,18 @@ class WordpressFactPod
      * Plugin version
      */
     const string VERSION = '0.0.1';
-
-    /**
-     * Plugin path
-     */
-    private string $pluginPath;
-
-    /**
-     * Plugin URL
-     */
-    private string $pluginUrl;
-
     /**
      * Instance of this class
      */
     private static $instance = null;
-
     /**
-     * Get the singleton instance of this class
-     *
-     * @return WordpressFactPod
+     * Plugin path
      */
-    public static function get_instance(): self
-    {
-        if (null === self::$instance) {
-            self::$instance = new self();
-        }
-
-        return self::$instance;
-    }
+    private string $pluginPath;
+    /**
+     * Plugin URL
+     */
+    private string $pluginUrl;
 
     /**
      * Constructor
@@ -77,9 +61,12 @@ class WordpressFactPod
 
         // Initialize OAuth
         $this->init_oauth();
-        
+
         // Initialize well-known endpoints
         $this->init_well_known();
+
+        // Initialize Facts
+        $this->init_facts();
 
         // Load user options if user is logged in
         $this->add_user_options();
@@ -93,18 +80,63 @@ class WordpressFactPod
     }
 
     /**
-     * Plugin activation
+     * Initialize OAuth
      */
-    public function activate(): void
+    private function init_oauth(): void
     {
-        require_once $this->pluginPath . 'install.php';
+        add_action('init', function () {
+            add_rewrite_rule(
+                '^openprofile/oauth/login/?$',
+                'index.php?wpfp_oauth_login=1',
+                'top'
+            );
 
-        wp_fact_pod_install_database(self::VERSION);
-        wp_fact_pod_generate_keys();
-        wp_fact_pod_publish_well_known_files();
+            add_rewrite_rule(
+                '^openprofile/oauth/scopes/?$',
+                'index.php?wpfp_oauth_scopes=1',
+                'top'
+            );
 
-        update_option('wpfp_flush_rewrite', true);
-        flush_rewrite_rules();
+            if (get_option('wpfp_flush_rewrite')) {
+                flush_rewrite_rules();
+                delete_option('wpfp_flush_rewrite');
+            }
+        });
+
+        add_filter('query_vars', function ($vars) {
+            $vars[] = 'wpfp_oauth_login';
+            $vars[] = 'wpfp_oauth_scopes';
+            return $vars;
+        });
+
+        add_action('template_redirect', function () {
+            if (get_query_var('wpfp_oauth_login')) {
+                include $this->pluginPath . 'templates/oauth-login.php';
+                exit;
+            }
+            if (get_query_var('wpfp_oauth_scopes')) {
+                include $this->pluginPath . 'templates/oauth-scopes.php';
+                exit;
+            }
+        });
+
+        add_action('init', function () {
+            $privateKey = $this->pluginPath . 'private.key';
+            $publicKey = $this->pluginPath . 'public.key';
+
+            if (file_exists($privateKey) && file_exists($publicKey)) {
+                new Auth($privateKey, $publicKey);
+            } else {
+                error_log('[FactPod] Missing private or public key at init.');
+            }
+
+            new Register();
+        });
+
+        add_action('wp_login', function () {
+            wp_redirect('/openprofile/oauth/scopes/');
+            exit;
+        });
     }
 
     /**
@@ -169,62 +201,12 @@ class WordpressFactPod
     }
 
     /**
-     * Initialize OAuth
+     * Initialize Facts
      */
-    private function init_oauth(): void
+    private function init_facts(): void
     {
         add_action('init', function () {
-            add_rewrite_rule(
-                '^openprofile/oauth/login/?$',
-                'index.php?wpfp_oauth_login=1',
-                'top'
-            );
-
-            add_rewrite_rule(
-                '^openprofile/oauth/scopes/?$',
-                'index.php?wpfp_oauth_scopes=1',
-                'top'
-            );
-
-            if (get_option('wpfp_flush_rewrite')) {
-                flush_rewrite_rules();
-                delete_option('wpfp_flush_rewrite');
-            }
-        });
-
-        add_filter('query_vars', function ($vars) {
-            $vars[] = 'wpfp_oauth_login';
-            $vars[] = 'wpfp_oauth_scopes';
-            return $vars;
-        });
-
-        add_action('template_redirect', function () {
-            if (get_query_var('wpfp_oauth_login')) {
-                include $this->pluginPath . 'templates/oauth-login.php';
-                exit;
-            }
-            if (get_query_var('wpfp_oauth_scopes')) {
-                include $this->pluginPath . 'templates/oauth-scopes.php';
-                exit;
-            }
-        });
-
-        add_action('init', function () {
-            $privateKey = $this->pluginPath . 'private.key';
-            $publicKey = $this->pluginPath . 'public.key';
-
-            if (file_exists($privateKey) && file_exists($publicKey)) {
-                new Auth($privateKey, $publicKey);
-            } else {
-                error_log('[FactPod] Missing private or public key at init.');
-            }
-
-            new Register();
-        });
-
-        add_action('wp_login', function () {
-            wp_redirect('/openprofile/oauth/scopes/');
-            exit;
+            new FactsApi();
         });
     }
 
@@ -236,6 +218,35 @@ class WordpressFactPod
         if (!is_admin() && function_exists('is_user_logged_in') && is_user_logged_in()) {
             require_once $this->pluginPath . 'src/user/user-options.php';
         }
+    }
+
+    /**
+     * Get the singleton instance of this class
+     *
+     * @return WordpressFactPod
+     */
+    public static function get_instance(): self
+    {
+        if (null === self::$instance) {
+            self::$instance = new self();
+        }
+
+        return self::$instance;
+    }
+
+    /**
+     * Plugin activation
+     */
+    public function activate(): void
+    {
+        require_once $this->pluginPath . 'install.php';
+
+        wp_fact_pod_install_database(self::VERSION);
+        wp_fact_pod_generate_keys();
+        wp_fact_pod_publish_well_known_files();
+
+        update_option('wpfp_flush_rewrite', true);
+        flush_rewrite_rules();
     }
 
     /**
