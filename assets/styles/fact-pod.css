@@ -83,7 +83,7 @@
 /*    float: right;*/
 /*}*/
 
-.fact-pod-form, .fact-pod-form.box {
+.fact-pod-form, .fact-pod-form.box, .fact-pod.oauth-scopes.box {
     width: 30rem;
     max-width: 92vw;
     padding: 3.5rem;
@@ -93,20 +93,26 @@
     background: #fff;
 }
 
-.fact-pod-form h2, .fact-pod-form.box h2 {
+.fact-pod.oauth-scopes.box {
+    width: 75%;
+    margin: 15px auto;
+    text-align: center;
+}
+
+.fact-pod-form h2, .fact-pod-form.box h2, .fact-pod.oauth-scopes.box h2{
     margin: 0 0 0.25rem;
     text-align: center;
     color: #202124;
     font-size: 24px;
     font-weight: 500;
 }
-.fact-pod-form .logo, .fact-pod-form.box .logo {
+.fact-pod-form .logo, .fact-pod-form.box .logo, .fact-pod.oauth-scopes.box .logo {
     display: flex;
     flex-direction: row;
     justify-content: center;
     margin-bottom: 16px;
 }
-.fact-pod-form p, .fact-pod-form.box p {
+.fact-pod-form p, .fact-pod-form.box p, .fact-pod.oauth-scopes.box p {
     font-size: 16px;
     font-weight: 400;
     letter-spacing: 0.2px;
@@ -116,7 +122,7 @@
     color: #5f6368;
 }
 
-.fact-pod-form .form-row, .fact-pod-form.box .form-row {
+.fact-pod-form .form-row, .fact-pod-form.box .form-row, .fact-pod.oauth-scopes.box .form-row{
     position: relative;
     margin-bottom: 16px;
 }
@@ -138,12 +144,14 @@
 }
 
 .fact-pod-form .form-row input:focus,.fact-pod-form.box .form-row input:focus,
-.fact-pod-form .form-row textarea:focus,.box .form-row textarea:focus {
+.fact-pod-form .form-row textarea:focus,.box .form-row textarea:focus,
+.fact-pod.oauth-scopes.box .form-row textarea:focus, .box .form-row textarea:focus {
     border: 2px solid #1a73e8;
     box-shadow: 0 0 0 3px rgba(26,115,232,.15);
 }
 
-.fact-pod-form .form-row label, .fact-pod-form.box .form-row label {
+.fact-pod-form .form-row label, .fact-pod-form.box .form-row label,
+.fact-pod.oauth-scopes.box .form-row label {
     position: absolute;
     top: 0;
     left: 12px;
@@ -155,7 +163,8 @@
     transition: transform .15s ease, color .15s ease, font-size .15s ease, top .15s ease;
 }
 .fact-pod-form .form-row label.woocommerce-form__label.woocommerce-form__label-for-checkbox.woocommerce-form-login__rememberme,
-.fact-pod-form.box .form-row label.woocommerce-form__label.woocommerce-form__label-for-checkbox.woocommerce-form-login__rememberme{
+.fact-pod-form.box .form-row label.woocommerce-form__label.woocommerce-form__label-for-checkbox.woocommerce-form-login__rememberme,
+.fact-pod.oauth-scopes.box .form-row label.woocommerce-form__label.woocommerce-form__label-for-checkbox.woocommerce-form-login__rememberme {
     position: static;
 }
 
@@ -166,7 +175,11 @@
 .fact-pod-form.box .form-row input:focus + label,
 .fact-pod-form.box .form-row input:not(:placeholder-shown) + label,
 .fact-pod-form.box .form-row textarea:focus + label,
-.fact-pod-form.box .form-row textarea:not(:placeholder-shown) + label {
+.fact-pod-form.box .form-row textarea:not(:placeholder-shown) + label,
+.fact-pod.oauth-scopes.box .form-row input:focus + label,
+.fact-pod.oauth-scopes.box .form-row input:not(:placeholder-shown) + label,
+.fact-pod.oauth-scopes.box .form-row textarea:focus + label,
+.fact-pod.oauth-scopes.box .form-row textarea:not(:placeholder-shown) + label {
     transform: translateY(-18px);
     color: #1a73e8;
     font-size: 12px;
@@ -178,7 +191,10 @@
 .fact-pod-form button,
 .fact-pod-form.box input[type="submit"],
 .fact-pod-form.box .button,
-.fact-pod-form.box button {
+.fact-pod-form.box button,
+.fact-pod.oauth-scopes.box input[type="submit"],
+.fact-pod.oauth-scopes.box .button,
+.fact-pod.oauth-scopes.box button {
     border: none;
     outline: none;
     color: #fff;
@@ -201,7 +217,10 @@
 .fact-pod-form button:hover,
 .fact-pod-form.box input[type="submit"]:hover,
 .fact-pod-form.box .button:hover,
-.fact-pod-form.box button:hover {
+.fact-pod-form.box button:hover,
+.fact-pod.oauth-scopes.box input[type="submit"]:hover,
+.fact-pod.oauth-scopes.box .button:hover,
+.fact-pod.oauth-scopes.box button:hover {
     background-color: #287ae6;
 }
 
@@ -212,7 +231,8 @@
     margin-top: 8px;
 }
 
-#oauth-scopes-form .scope {
+#oauth-scopes-form .scope,
+#approve-form .scope {
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -220,15 +240,25 @@
     font-size: 14px;
     color: #3c4043;
 }
-#oauth-scopes-form .scope input[type="checkbox"] {
+#oauth-scopes-form .scope input[type="checkbox"],
+#approve-form .scope input[type="checkbox"] {
     margin-top: 2px;
+    background-color: #287ae6;
 }
-#oauth-scopes-form label {
+
+#oauth-scopes-form .scope input[type="checkbox"]:checked,
+#approve-form .scope input[type="checkbox"]:checked {
+    background-color: #287ae6;
+}
+
+#oauth-scopes-form label,
+#approve-form label {
     display: block;
     margin-bottom: 15px;
 }
 
-#oauth-scopes-form .button{
+#oauth-scopes-form .button,
+#approve-form .button{
     width: 230px;
     margin-bottom: 15px;
     box-sizing: border-box;
@@ -238,4 +268,63 @@
 .woocommerce form .form-row input.input-text,
 .woocommerce form .form-row textarea {
     width: 100% !important;
+}
+
+.fact-pod-form .form-row,
+.fact-pod-form.box .form-row {
+    position: relative;
+}
+
+.fact-pod-form .form-row input[type="text"],
+.fact-pod-form .form-row input[type="email"],
+.fact-pod-form .form-row input[type="password"],
+.fact-pod-form .form-row textarea,
+.fact-pod-form.box .form-row input[type="text"],
+.fact-pod-form.box .form-row input[type="email"],
+.fact-pod-form.box .form-row input[type="password"],
+.fact-pod-form.box .form-row textarea {
+    padding-top: 1.1rem;
+}
+
+.fact-pod-form .form-row:has(input[type="checkbox"]) label,
+.fact-pod-form.box .form-row:has(input[type="checkbox"]) label {
+    position: static;
+    transform: none;
+    top: auto;
+}
+
+.fact-pod-form .form-row label,
+.fact-pod-form.box .form-row label {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    padding: 0 4px;
+    font-size: 14px;
+    color: #777;
+    background: #fff;
+    line-height: 1;
+    pointer-events: none;
+    transition: transform .15s ease, color .15s ease, font-size .15s ease, top .15s ease;
+}
+
+.fact-pod-form .form-row:focus-within label,
+.fact-pod-form.box .form-row:focus-within label {
+    top: -6px;
+    font-size: 12px;
+    color: #1a73e8;
+}
+
+.fact-pod-form .form-row:has(input:valid) label,
+.fact-pod-form.box .form-row:has(input:valid) label {
+    top: -6px;
+    font-size: 12px;
+    color: #1a73e8;
+}
+
+.fact-pod-form .form-row input:focus,
+.fact-pod-form .form-row textarea:focus,
+.fact-pod-form.box .form-row input:focus,
+.fact-pod-form.box .form-row textarea:focus {
+    border: 2px solid #1a73e8;
+    box-shadow: 0 0 0 3px rgba(26,115,232,.15);
 }
