@@ -4,6 +4,7 @@ namespace OpenProfile\WordpressFactPod\Facts;
 
 use OpenProfile\WordpressFactPod\Facts\Repositories\FactsRepository;
 use OpenProfile\WordpressFactPod\Utils\Http;
+use OpenProfile\WordpressFactPod\Utils\WooCommerce;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -54,6 +55,62 @@ class Api
         $repo  = new FactsRepository();
         $facts = $repo->getByCategory($userId, $category);
 
-        return new WP_REST_Response($facts, 200);
+        $categoryName = $this->resolveCategoryDisplayName($facts, $category);
+
+        $orders = [];
+        foreach ($facts as $fact) {
+            $orders[] = [
+                '@context'         => 'https://schema.org',
+                '@type'            => 'Order',
+                '@id'              => $fact->getFactId(),
+                'orderedItem'      => [
+                    '@type'          => 'Product',
+                    '@id'            => $fact->getProductUrn(),
+                    'name'           => $fact->getProductName(),
+                    'category'       => $fact->getCategoryName(),
+                    'additionalType' => $fact->getCategoryUrl(),
+                ],
+                'orderDate'        => $fact->getOrderDate(),
+                'priceCurrency'    => $fact->getPriceCurrency(),
+                'price'            => $fact->getPrice(),
+                'seller'           => [
+                    '@type' => 'Organization',
+                    'name'  => get_bloginfo('name') ?: 'Store',
+                ],
+                'mainEntityOfPage' => $fact->getProductViewUrl(),
+            ];
+        }
+
+        $collection = [
+            '@context' => [
+                'https://schema.org',
+            ],
+            '@type'   => 'Collection',
+            'name'    => 'Purchases - ' . $categoryName,
+            'hasPart' => $orders,
+        ];
+
+        return new WP_REST_Response($collection, 200);
+    }
+
+    private function resolveCategoryDisplayName(array $facts, string $requested): string
+    {
+        foreach ($facts as $fact) {
+            if (method_exists($fact, 'getCategoryName')) {
+                $name = $fact->getCategoryName();
+                if ($name !== '') {
+                    return $name;
+                }
+            }
+        }
+
+        if (class_exists(WooCommerce::class) && WooCommerce::isActive()) {
+            $term = WooCommerce::resolveCategoryTerm($requested);
+            if ($term instanceof \WP_Term && !empty($term->name)) {
+                return $term->name;
+            }
+        }
+
+        return ucwords(str_replace(['-', '_'], ' ', $requested));
     }
 }
