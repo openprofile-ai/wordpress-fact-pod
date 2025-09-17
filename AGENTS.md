@@ -26,7 +26,11 @@ Guidance for AI agents (and contributors) working on the WordPress Fact Pod plug
     - WordpressFactPod.php: central place for WordPress hooks, rewrite rules, enqueueing assets, menus, and wiring modules together. All webhooks and other WordPress-related wiring should be implemented here as much as possible.
     - Database/: database migrations and schema helpers.
     - OAuth/: authorization, registration, token services, repositories, validators.
-    - Utils/: general helpers (e.g., WellKnown.php builds discovery/JWKS payloads; WooCommerce.php reads categories; Session.php session handling).
+    - Utils/: general helpers (e.g., WellKnown.php builds discovery/JWKS payloads; WooCommerce.php reads categories; Session.php session handling; Http.php for transforms and authenticate()).
+    - Facts/: module for facts-related functionality.
+        - Api.php: registers Facts REST routes (register_rest_route) and coordinates handling.
+        - Entities/: domain entities (e.g., Entities/Fact.php).
+        - Repositories/: data access (e.g., Repositories/FactsRepository.php).
 - templates/
     - WordPress HTML/PHP view files (e.g., oauth-login.php, oauth-scopes.php, admin settings page, public templates).
     - The src/ folder will be moved under templates/ as well (keep logic minimal in templates; call into includes/* code).
@@ -53,6 +57,9 @@ Strict rules:
     - init_oauth() registers rewrites for /openprofile/oauth/login and /openprofile/oauth/scopes to load templates/oauth-*.php.
     - OAuth runtime wiring (Auth, Register) is initialized on init if keys are present.
     - wp_login redirects to scopes UI.
+- Facts REST API
+    - init_facts() instantiates Facts\Api registrar on init; the registrar hooks rest_api_init and registers routes under /wp-json/openprofile/facts/*.
+    - Protected Facts routes use Utils\\Http::authenticate() in permission_callback.
 - WooCommerce integration
     - Utils\WooCommerce provides top-level category metadata and shop URL for discovery.
 - Assets and Admin
@@ -64,12 +71,14 @@ Strict rules:
 ### How agents should implement changes
 - WordPress integration, hooks, routing
     - Add all WordPress add_action/add_filter/add_rewrite_rule registrations in includes/WordpressFactPod.php.
-    - If you need new REST endpoints, define the registration (register_rest_route) inside a function hooked from includes/WordpressFactPod.php (e.g., on rest_api_init), while the endpoint logic itself should live in includes/OAuth or includes/Utils as appropriate.
+    - New REST endpoints should be registered in a small module registrar class (e.g., includes/Facts/Api.php) that hooks rest_api_init. Instantiate the registrar from a dedicated init_<api>() method in includes/WordpressFactPod.php (e.g., init_facts()).
+    - Permission callbacks for Bearer-protected routes must call Utils\\Http::authenticate($request) and propagate WP_Error (401 on invalid/missing token; 403 for future insufficient scope cases).
 - Business logic
     - Create/extend classes under includes/ according to these categories:
         - Database for migrations and schema.
         - OAuth for auth flows, tokens, repositories.
-        - Utils for helpers and cross-cutting utilities.
+        - Utils for helpers and cross-cutting utilities (including Http::authenticate and request/response transforms).
+        - Facts for facts domain (Api, Entities, Repositories).
 - Templates and output
     - Put any HTML/PHP rendering into templates/.
     - Keep templates thin; they should call into includes/* classes to fetch data.
@@ -82,7 +91,8 @@ Strict rules:
 ---
 
 ### Coding guidelines for agents
-- PHP 8.1+ syntax and strict_types where reasonable; use namespaces under OpenProfile\WordpressFactPod.
+- PHP 8.3 target (per composer.json). Do not use PHP strict mode (do not add declare(strict_types=1)). Use namespaces under OpenProfile\\WordpressFactPod.
+- Do not add docblocks/comments for properties or methods. Keep classes minimal; prefer native type hints where clear.
 - Do not perform header() or echo in includes/* except within WordPress output hooks specifically designed to output (e.g., the small template_redirect closures in includes/WordpressFactPod.php). Prefer delegating output to templates.
 - Avoid global state; use singletons only where already established (WordpressFactPod::get_instance()).
 - Security: validate all input (REST params, query vars), escape output in templates, never store unhashed secrets, respect WordPress nonces in admin forms.
@@ -98,6 +108,8 @@ Strict rules:
 - includes/Database/* (migrations)
 - includes/OAuth/* (OAuth server logic, repositories)
 - includes/Utils/WellKnown.php (discovery/JWKS generation)
+- includes/Utils/Http.php (PSR-7/WP transforms and authenticate())
+- includes/Facts/* (Facts module: Api.php, Entities, Repositories)
 - includes/Utils/WooCommerce.php (category/shop helpers)
 - templates/* (views; includes admin settings, oauth-login.php, oauth-scopes.php)
 - assets/js/* and assets/styles/* (client assets)
@@ -106,7 +118,8 @@ Strict rules:
 
 ### Non-negotiable rules for AI agents
 - Do not place HTTP output or direct WordPress routing inside includes/* modules other than the minimal wiring in includes/WordpressFactPod.php.
-- All new WordPress hooks, rewrite rules, REST registrations must be wired from includes/WordpressFactPod.php.
-- The Includes folder must contain no HTTP — only PHP code (classes, services, repositories, migrations, utilities).
+- All new WordPress hooks, rewrite rules, and REST route registrar instantiations must be wired from includes/WordpressFactPod.php in a dedicated init_<api>() method per feature (e.g., init_facts()).
+- Protected REST routes must use Utils\\Http::authenticate() in permission_callback.
+- The includes folder must contain no HTTP — only PHP code (classes, services, repositories, migrations, utilities).
 - Keep assets in assets/ and templates in templates/ (the src folder is being migrated into templates/).
 - This is a WordPress + WooCommerce plugin; ensure WooCommerce checks exist before calling its APIs.

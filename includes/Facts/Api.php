@@ -35,10 +35,6 @@ class Api
         );
     }
 
-    /**
-     * Validate Bearer token and resolve user.
-     * Return true to allow, or WP_Error to deny (REST API will use status).
-     */
     public function permission_check(WP_REST_Request $request): bool|WP_Error
     {
         $user = Http::authenticate($request);
@@ -46,6 +42,7 @@ class Api
             $request->set_param('_wpfp_user_id', $user->ID);
             return true;
         }
+
         return $user; // WP_Error
     }
 
