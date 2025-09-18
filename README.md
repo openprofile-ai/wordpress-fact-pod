@@ -109,6 +109,62 @@ name=My%20Application&redirect_uri=https://example.com/callback&grant_types=auth
 
 > **Important**: The `client_secret` is only returned once during registration. Make sure to store it securely as it cannot be retrieved later.
 
+## Facts API (schema.org)
+Returns a schema.org ItemList of the authenticated user’s WooCommerce purchases filtered by product category.
+
+### Endpoint
+- GET /wp-json/openprofile/facts
+
+### Authentication
+- OAuth 2.0 Bearer token
+- Header: Authorization: Bearer YOUR_ACCESS_TOKEN
+
+### Parameters
+| Name     | In    | Type   | Required | Description                                                     |
+|----------|-------|--------|----------|-----------------------------------------------------------------|
+| category | query | string | Yes      | WooCommerce product category slug (preferred) or category name. |
+
+### Example request
+```
+curl -H "Authorization: Bearer eyJhbGciOi..." \
+  "http://docker.vm/wp-json/openprofile/facts?category=body-lotion"
+```
+
+### Example response
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Purchases - Body lotion",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "item": {
+        "@type": "Order",
+        "@id": "http://docker.vm/my-account-2/view-order/1856/#item-17",
+        "orderDate": "2023-09-18",
+        "totalPrice": 28.0,
+        "priceCurrency": "UAH",
+        "seller": { "@type": "Organization", "name": "openprofile" },
+        "orderedItem": {
+          "@type": "Product",
+          "@id": "http://docker.vm/product/339/",
+          "name": "Almond Milk Lotion",
+          "category": "Body lotion",
+          "additionalType": "http://docker.vm/product-category/body-lotion/"
+        }
+      }
+    }
+  ]
+}
+```
+
+### Notes
+- Order @id is the order view URL with a line-item fragment (#item-{id}); it resolves and avoids 404s.
+- Product @id uses the product permalink (falls back to /?p={id} if pretty permalinks are disabled).
+- totalPrice is a number; dates are YYYY-MM-DD.
+
 ## OAuth 2.0 Authorization
 
 ### Generating the Authorization Link
