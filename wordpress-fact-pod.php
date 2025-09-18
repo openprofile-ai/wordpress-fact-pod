@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: OpenProfile Wordpress Fact Pod Plugin
  * Description: Connecting to the MCP.
@@ -9,6 +10,11 @@
 use OpenProfile\WordpressFactPod\WordpressFactPod;
 
 defined('ABSPATH') || exit;
+
+// Define plugin directory path constant
+if (!defined('WPFP_PLUGIN_DIR')) {
+    define('WPFP_PLUGIN_DIR', plugin_dir_path(__FILE__));
+}
 
 // Check if Composer autoloader exists.
 if (!file_exists(plugin_dir_path(__FILE__) . 'vendor/autoload.php')) {
@@ -24,7 +30,7 @@ if (!file_exists(plugin_dir_path(__FILE__) . 'vendor/autoload.php')) {
 require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
 
 // Set custom error handler
-set_error_handler(function($errno, $errstr, $errfile, $errline) {
+set_error_handler(function ($errno, $errstr, $errfile, $errline) {
     if (defined('WP_DEBUG') && WP_DEBUG) {
         error_log("Custom error handler: $errstr in $errfile on line $errline");
     }
@@ -32,7 +38,8 @@ set_error_handler(function($errno, $errstr, $errfile, $errline) {
 }, E_USER_NOTICE);
 
 // Initialize the plugin
-function wordpress_fact_pod_init() {
+function wordpress_fact_pod_init()
+{
     return WordpressFactPod::get_instance();
 }
 

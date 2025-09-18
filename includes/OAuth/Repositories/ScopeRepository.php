@@ -27,7 +27,7 @@ class ScopeRepository extends AbstractRepository implements ScopeRepositoryInter
             return null;
         }
 
-        return new ScopeEntity($scopeRow->scope, $scopeRow->description);
+        return new ScopeEntity($scopeRow->scope, $scopeRow->description, (bool)$scopeRow->is_active);
     }
 
     public function validateScopesExist(array $scopes = []): bool
@@ -60,9 +60,42 @@ class ScopeRepository extends AbstractRepository implements ScopeRepositoryInter
     {
         $wpdb = self::getDB();
         $table = $this->getTable();
-        
+
         $results = $wpdb->get_col("SELECT scope FROM $table WHERE is_active=1");
-        
+
         return $results ?: [];
+    }
+
+    public function getAllScopes(): array
+    {
+        $wpdb = self::getDB();
+        $table = $this->getTable();
+
+        $results = $wpdb->get_results("SELECT scope, description, is_active FROM $table");
+
+        if (!$results) {
+            return [];
+        }
+
+        return array_map(
+            fn($scope) => new ScopeEntity($scope->scope, $scope->description, (bool)$scope->is_active),
+            $results
+        );
+    }
+
+    public function updateScopeStatus(string $scope, bool $isActive): bool
+    {
+        $wpdb = self::getDB();
+        $table = $this->getTable();
+
+        $result = $wpdb->update(
+            $table,
+            ['is_active' => $isActive ? 1 : 0],
+            ['scope' => $scope],
+            ['%d'],
+            ['%s']
+        );
+
+        return $result !== false;
     }
 }
