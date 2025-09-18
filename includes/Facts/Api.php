@@ -19,8 +19,8 @@ class Api
     public function register_routes(): void
     {
         register_rest_route(
-            'openprofile/facts',
-            '/user/(?P<category>[a-zA-Z0-9_-]+)',
+            'openprofile',
+            '/facts',
             [
                 'methods'             => 'GET',
                 'callback'            => [$this, 'get_user_facts_by_category'],
@@ -29,7 +29,7 @@ class Api
                     'category' => [
                         'required'          => true,
                         'type'              => 'string',
-                        'sanitize_callback' => 'sanitize_key',
+                        'sanitize_callback' => 'sanitize_text_field',
                     ],
                 ],
             ]
