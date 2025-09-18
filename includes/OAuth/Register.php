@@ -26,8 +26,8 @@ class Register extends AbstractRepository
     public function registerRoutes(): void
     {
         register_rest_route(
-            'openprofile/oauth',
-            '/register',
+            'openprofile',
+            '/oauth/register',
             array(
                 'methods'             => 'POST',
                 'callback'            => array( $this, 'register' ),

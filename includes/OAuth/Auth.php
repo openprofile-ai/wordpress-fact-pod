@@ -63,8 +63,8 @@ class Auth
     public function register_routes(): void
     {
         register_rest_route(
-            'openprofile/oauth',
-            '/authorize',
+            'openprofile',
+            '/oauth/authorize',
             array(
                 'methods' => 'GET',
                 'callback' => array($this, 'authorize'),
@@ -73,8 +73,8 @@ class Auth
         );
 
         register_rest_route(
-            'openprofile/oauth',
-            '/approve',
+            'openprofile',
+            '/oauth/approve',
             array(
                 'methods' => 'POST',
                 'callback' => array($this, 'approve'),
@@ -91,8 +91,8 @@ class Auth
         );
 
         register_rest_route(
-            'openprofile/oauth',
-            '/deny',
+            'openprofile',
+            '/oauth/deny',
             array(
                 'methods' => 'POST',
                 'callback' => array($this, 'deny'),
@@ -101,8 +101,8 @@ class Auth
         );
 
         register_rest_route(
-            'openprofile/oauth',
-            '/access_token',
+            'openprofile',
+            '/oauth/access_token',
             array(
                 'methods' => 'POST',
                 'callback' => array($this, 'access_token'),
