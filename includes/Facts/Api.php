@@ -57,37 +57,38 @@ class Api
 
         $categoryName = $this->resolveCategoryDisplayName($facts, $category);
 
-        $orders = [];
+        $listItems = [];
+        $position = 1;
         foreach ($facts as $fact) {
-            $orders[] = [
-                '@context'         => 'https://schema.org',
-                '@type'            => 'Order',
-                '@id'              => $fact->getFactId(),
-                'orderedItem'      => [
-                    '@type'          => 'Product',
-                    '@id'            => $fact->getProductUrn(),
-                    'name'           => $fact->getProductName(),
-                    'category'       => $fact->getCategoryName(),
-                    'additionalType' => $fact->getCategoryUrl(),
+            $listItems[] = [
+                '@type'    => 'ListItem',
+                'position' => $position++,
+                'item'     => [
+                    '@type'           => 'Order',
+                    '@id'             => $fact->getOrderItemUrl(),
+                    'orderDate'       => $fact->getOrderDate(),
+                    'totalPrice'      => (float) $fact->getPrice(),
+                    'priceCurrency'   => $fact->getPriceCurrency(),
+                    'seller'          => [
+                        '@type' => 'Organization',
+                        'name'  => get_bloginfo('name') ?: 'openprofile',
+                    ],
+                    'orderedItem'     => [
+                        '@type'          => 'Product',
+                        '@id'            => $fact->getProductIdUrl(),
+                        'name'           => $fact->getProductName(),
+                        'category'       => $fact->getCategoryName(),
+                        'additionalType' => $fact->getCategoryUrl(),
+                    ],
                 ],
-                'orderDate'        => $fact->getOrderDate(),
-                'priceCurrency'    => $fact->getPriceCurrency(),
-                'price'            => $fact->getPrice(),
-                'seller'           => [
-                    '@type' => 'Organization',
-                    'name'  => get_bloginfo('name') ?: 'Store',
-                ],
-                'mainEntityOfPage' => $fact->getProductViewUrl(),
             ];
         }
 
         $collection = [
-            '@context' => [
-                'https://schema.org',
-            ],
-            '@type'   => 'Collection',
-            'name'    => 'Purchases - ' . $categoryName,
-            'hasPart' => $orders,
+            '@context'        => 'https://schema.org',
+            '@type'           => 'ItemList',
+            'name'            => 'Purchases - ' . $categoryName,
+            'itemListElement' => $listItems,
         ];
 
         return new WP_REST_Response($collection, 200);

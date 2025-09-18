@@ -70,20 +70,31 @@ class Fact
         return $this->price;
     }
 
-    public function getProductViewUrl(): string
+    public function getOrderViewUrl(): string
     {
         return $this->productViewUrl;
     }
 
-    public function getFactId(): string
+    // schema.org-friendly HTTP identifiers
+    public function getOrderItemUrl(): string
     {
-        return 'urn:wp:order:' . $this->orderId . ':item:' . $this->itemId;
+        // Use the actual order view URL and add a stable fragment to point to the line item
+        $orderUrl = $this->getOrderViewUrl();
+        if ($orderUrl === '') {
+            // Fallback if the My Account page URL cannot be resolved
+            $orderUrl = \home_url('/my-account/view-order/' . $this->orderId);
+        }
+        return rtrim($orderUrl, '/') . '#item-' . $this->itemId;
     }
 
-    public function getProductUrn(): string
+    public function getProductIdUrl(): string
     {
-        return $this->productSku !== ''
-            ? 'urn:sku:' . $this->productSku
-            : 'urn:wp:product:' . $this->productId;
+        // Prefer the real product permalink
+        $permalink = \get_permalink($this->productId);
+        if (!empty($permalink) && !\is_wp_error($permalink)) {
+            return (string)$permalink;
+        }
+        // Fallback if permalinks are disabled
+        return \home_url('/?p=' . $this->productId);
     }
 }
