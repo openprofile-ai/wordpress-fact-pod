@@ -37,10 +37,6 @@ Guidance for AI agents (and contributors) working on the WordPress Fact Pod plug
 - assets/
     - JS and CSS (enqueued from includes/WordpressFactPod.php).
 
-Strict rules:
-- includes/ must contain only PHP classes/modules with no direct HTTP I/O (no echo/header/json_encode for responses). Build data, return arrays/strings, and let WordPress routing/templates output.
-- Prefer adding WordPress hooks, filters, rewrite rules, and enqueueing to includes/WordpressFactPod.php to keep a single integration point.
-- Place business logic in includes/ submodules; keep templates strictly for rendering.
 
 ---
 
@@ -115,6 +111,35 @@ Strict rules:
 - assets/js/* and assets/styles/* (client assets)
 
 ---
+
+#### Facts API (for agents)
+Purpose: Return a schema.org ItemList of a user’s WooCommerce purchases filtered by product category.
+
+- Route: GET /wp-json/openprofile/facts
+- Auth: Bearer token via Utils\\Http::authenticate() in permission_callback; sets _wpfp_user_id on success; WP_Error 401 on failure.
+- Params: category (string, required) — WooCommerce product category slug (preferred) or name; sanitized with sanitize_text_field.
+
+- Data flow:
+  - Facts\\Repositories\\FactsRepository::getByCategory($userId, $category)
+  - Facts\\Entities\\Fact getters: getOrderItemUrl(), getProductIdUrl(), getOrderViewUrl(), getProductName(), getCategoryName(), getCategoryUrl(), getOrderDate(), getPrice(), getPriceCurrency()
+  - Utils\\WooCommerce for category term resolution and order retrieval.
+
+- Response (JSON-LD):
+  - Top: { "@context": "https://schema.org", "@type": "ItemList", "name": "Purchases - {Category}", "itemListElement": [ListItem...] }
+  - ListItem: { "@type": "ListItem", "position": N, "item": Order }
+  - Order: { "@type": "Order", "@id": order view URL + "#item-{lineItemId}", "orderDate": "YYYY-MM-DD"|null, "totalPrice": number, "priceCurrency": "ISO4217", "seller": { "@type": "Organization", "name": bloginfo('name') or "openprofile" }, "orderedItem": Product }
+  - Product: { "@type": "Product", "@id": get_permalink($productId) or home_url('/?p=' . $productId), "name": string, "category": string, "additionalType": term link }
+  - Do not include mainEntityOfPage; no per-item @context.
+
+- Edge cases:
+  - WooCommerce inactive or no matches: return empty ItemList (200).
+  - totalPrice must be numeric (cast to float).
+  - Category display name: prefer Fact::getCategoryName(); else resolved term->name; else prettified input.
+
+- Testing checklist:
+  - 401 on missing/invalid token; 200 on valid token.
+  - Schema keys present; ListItem wrapper with position.
+  - @id URLs resolve (order view + fragment; product permalink or fallback).
 
 ### Non-negotiable rules for AI agents
 - Do not place HTTP output or direct WordPress routing inside includes/* modules other than the minimal wiring in includes/WordpressFactPod.php.
