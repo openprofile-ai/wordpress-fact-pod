@@ -46,7 +46,8 @@ class ClientRepository extends AbstractRepository implements ClientRepositoryInt
 
         $client = $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM $table WHERE id = %s", $clientIdentifier
+                "SELECT * FROM $table WHERE id = %s",
+                $clientIdentifier
             )
         );
 
@@ -72,15 +73,39 @@ class ClientRepository extends AbstractRepository implements ClientRepositoryInt
     {
         $wpdb = self::getDB();
         $table = $this->getTable();
-        
+
         $existingClient = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT id FROM $table WHERE domain = %s",
                 $domain
             )
         );
-        
+
         return $existingClient !== null;
+    }
+
+    /**
+     * @return ClientEntityInterface[]
+     */
+    public function getClients(): array
+    {
+        $wpdb = self::getDB();
+        $table = $this->getTable();
+
+        $clients = $wpdb->get_results("SELECT id, name, redirect_uri FROM $table");
+
+        if (!$clients) {
+            return [];
+        }
+
+        return array_map(
+            fn($client) => new ClientEntity(
+                $client->id,
+                $client->name,
+                $client->redirect_uri
+            ),
+            $clients
+        );
     }
 
     /**

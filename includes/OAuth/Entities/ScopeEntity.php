@@ -6,7 +6,7 @@ use League\OAuth2\Server\Entities\ScopeEntityInterface;
 
 class ScopeEntity implements ScopeEntityInterface
 {
-    public function __construct(private string $identifier, private string $description = '')
+    public function __construct(private string $identifier, private string $description = '', private bool $isActive = true)
     {}
 
     public function getIdentifier(): string
@@ -22,5 +22,10 @@ class ScopeEntity implements ScopeEntityInterface
     public function getDescription(): string
     {
         return $this->description;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->isActive;
     }
 }
